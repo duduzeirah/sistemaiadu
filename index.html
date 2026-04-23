@@ -1,0 +1,913 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  ArrowUpCircle, 
+  ArrowDownCircle, 
+  Wallet, 
+  Trash2, 
+  Edit2, 
+  Home, 
+  CheckCircle2, 
+  X,
+  Store,
+  Package,
+  ShoppingCart,
+  Users,
+  Calendar,
+  TrendingUp,
+  Box,
+  Layers,
+  DollarSign
+} from 'lucide-react';
+
+export default function App() {
+  const [currentView, setCurrentView] = useState('home'); // 'home', 'loading', 'finance', 'sales', 'inventory'
+  const [targetView, setTargetView] = useState('');
+
+  const navigateTo = (view) => {
+    setTargetView(view);
+    setCurrentView('loading');
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-200">
+      {currentView === 'home' && <HomeScreen onSelect={navigateTo} />}
+      {currentView === 'loading' && <LoadingScreen target={targetView} onComplete={() => setCurrentView(targetView)} />}
+      {currentView === 'finance' && <FinanceModule onBack={() => setCurrentView('home')} />}
+      
+      {currentView === 'sales' && <SalesModule onBack={() => setCurrentView('home')} />}
+      {currentView === 'inventory' && <InventoryModule onBack={() => setCurrentView('home')} />}
+    </div>
+  );
+}
+
+// ==========================================
+// TELA INICIAL
+// ==========================================
+function HomeScreen({ onSelect }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <div className="absolute top-8">
+        <h1 className="text-4xl font-black tracking-tighter text-blue-600">IADU</h1>
+      </div>
+
+      <div className="w-full max-w-3xl text-center space-y-12">
+        <h2 className="text-3xl md:text-5xl font-bold text-slate-800">
+          O que você quer resolver hoje?
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <button 
+            onClick={() => onSelect('finance')}
+            className="group flex flex-col items-center justify-center p-10 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300"
+          >
+            <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Wallet size={40} />
+            </div>
+            <span className="text-xl font-semibold text-slate-700 group-hover:text-blue-600">
+              Controlar dinheiro
+            </span>
+          </button>
+
+          <button 
+            onClick={() => onSelect('sales')}
+            className="group flex flex-col items-center justify-center p-10 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300"
+          >
+            <div className="w-20 h-20 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Store size={40} />
+            </div>
+            <span className="text-xl font-semibold text-slate-700 group-hover:text-blue-600">
+              Controlar vendas
+            </span>
+          </button>
+
+          <button 
+            onClick={() => onSelect('inventory')}
+            className="group flex flex-col items-center justify-center p-10 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300"
+          >
+            <div className="w-20 h-20 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+              <Package size={40} />
+            </div>
+            <span className="text-xl font-semibold text-slate-700 group-hover:text-blue-600">
+              Controlar estoque
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// TELA DE CARREGAMENTO (TRANSIÇÃO)
+// ==========================================
+function LoadingScreen({ onComplete }) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(old => {
+        const newProgress = old + 5;
+        if (newProgress >= 100) {
+          clearInterval(interval);
+          setTimeout(onComplete, 300); // pequeno delay em 100%
+          return 100;
+        }
+        return newProgress;
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [onComplete]);
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
+      <h1 className="text-3xl font-black tracking-tighter text-blue-600 mb-12">IADU</h1>
+      
+      <div className="w-full max-w-md text-center space-y-6">
+        <p className="text-xl font-medium text-slate-600 animate-pulse">
+          Preparando seu sistema...
+        </p>
+        
+        <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-blue-600 transition-all duration-75 ease-linear rounded-full"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// MÓDULO: CONTROLE FINANCEIRO
+// ==========================================
+function FinanceModule({ onBack }) {
+  // Estado principal
+  const [transactions, setTransactions] = useState([]);
+  
+  // Estado do formulário
+  const [type, setType] = useState('in'); // 'in' ou 'out'
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [editingId, setEditingId] = useState(null);
+
+  // Cálculos automáticos
+  const totalIn = transactions.filter(t => t.type === 'in').reduce((acc, curr) => acc + curr.amount, 0);
+  const totalOut = transactions.filter(t => t.type === 'out').reduce((acc, curr) => acc + curr.amount, 0);
+  const balance = totalIn - totalOut;
+
+  // Formatação de moeda
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!amount || isNaN(amount) || amount <= 0) return;
+
+    const newTransaction = {
+      id: editingId || Date.now().toString(),
+      type,
+      amount: parseFloat(amount),
+      description: description || (type === 'in' ? 'Entrada' : 'Saída'),
+      date: new Date().toISOString()
+    };
+
+    if (editingId) {
+      setTransactions(transactions.map(t => t.id === editingId ? newTransaction : t));
+      setEditingId(null);
+    } else {
+      setTransactions([newTransaction, ...transactions]);
+    }
+
+    // Limpar formulário
+    setAmount('');
+    setDescription('');
+  };
+
+  const handleEdit = (transaction) => {
+    setType(transaction.type);
+    setAmount(transaction.amount.toString());
+    setDescription(transaction.description);
+    setEditingId(transaction.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = (id) => {
+    setTransactions(transactions.filter(t => t.id !== id));
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setAmount('');
+    setDescription('');
+  };
+
+  return (
+    <div className="min-h-screen pb-20">
+      {/* Cabeçalho */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-black text-blue-600">IADU</h1>
+            <span className="w-1 h-6 bg-slate-200 rounded-full"></span>
+            <h2 className="text-lg font-semibold text-slate-700">Controle Financeiro</h2>
+          </div>
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <Home size={20} />
+            <span className="hidden sm:inline">Início</span>
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 mt-8 space-y-8">
+        
+        {/* Resumo Automático (Cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 text-emerald-600 mb-2">
+              <ArrowUpCircle size={24} />
+              <span className="font-semibold">Total de Entradas</span>
+            </div>
+            <span className="text-3xl font-bold text-slate-800">{formatCurrency(totalIn)}</span>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 text-rose-600 mb-2">
+              <ArrowDownCircle size={24} />
+              <span className="font-semibold">Total de Saídas</span>
+            </div>
+            <span className="text-3xl font-bold text-slate-800">{formatCurrency(totalOut)}</span>
+          </div>
+
+          <div className={`p-6 rounded-2xl shadow-sm flex flex-col justify-between ${balance >= 0 ? 'bg-blue-600 text-white' : 'bg-rose-600 text-white'}`}>
+            <div className="flex items-center gap-2 mb-2 opacity-90">
+              <Wallet size={24} />
+              <span className="font-semibold">Saldo Atual</span>
+            </div>
+            <span className="text-4xl font-bold">{formatCurrency(balance)}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Formulário de Adição */}
+          <div className="lg:col-span-1">
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm sticky top-28">
+              <h3 className="text-xl font-bold text-slate-800 mb-6">
+                {editingId ? 'Editar Movimentação' : 'Nova Movimentação'}
+              </h3>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* Seleção do Tipo */}
+                <div className="flex bg-slate-100 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setType('in')}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors ${
+                      type === 'in' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    <ArrowUpCircle size={20} /> Entrada
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setType('out')}
+                    className={`flex-1 py-3 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors ${
+                      type === 'out' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    <ArrowDownCircle size={20} /> Saída
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-600 mb-2">Valor (R$)</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="0,00"
+                      className="w-full text-2xl p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-600 mb-2">Descrição (Opcional)</label>
+                    <input 
+                      type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Ex: Venda de produto, Conta de luz..."
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex gap-2">
+                  <button 
+                    type="submit"
+                    className={`flex-1 py-4 px-6 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 ${
+                      type === 'in' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-rose-500 hover:bg-rose-600'
+                    } ${editingId ? '!bg-blue-600 hover:!bg-blue-700' : ''}`}
+                  >
+                    {editingId ? (
+                      <>Salvar Alteração</>
+                    ) : (
+                      <>
+                        {type === 'in' ? <ArrowUpCircle size={24} /> : <ArrowDownCircle size={24} />}
+                        Adicionar {type === 'in' ? 'Entrada' : 'Saída'}
+                      </>
+                    )}
+                  </button>
+
+                  {editingId && (
+                    <button 
+                      type="button"
+                      onClick={cancelEdit}
+                      className="py-4 px-4 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      title="Cancelar edição"
+                    >
+                      <X size={24} />
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Histórico */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 bg-slate-50">
+                <h3 className="text-xl font-bold text-slate-800">Histórico</h3>
+              </div>
+              
+              <div className="p-2">
+                {transactions.length === 0 ? (
+                  <div className="text-center py-16 px-4">
+                    <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 size={40} />
+                    </div>
+                    <h4 className="text-xl font-semibold text-slate-700 mb-2">Tudo limpo por aqui!</h4>
+                    <p className="text-slate-500">Adicione suas entradas e saídas ao lado para começar.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {transactions.map((t) => (
+                      <div key={t.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-colors border border-transparent hover:border-slate-100 group">
+                        
+                        <div className="flex items-center gap-4 mb-4 sm:mb-0">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${t.type === 'in' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                            {t.type === 'in' ? <ArrowUpCircle size={24} /> : <ArrowDownCircle size={24} />}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800 text-lg">{t.description}</p>
+                            <p className="text-sm text-slate-400">
+                              {new Date(t.date).toLocaleDateString('pt-BR')}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-6 ml-16 sm:ml-0">
+                          <span className={`text-xl font-bold ${t.type === 'in' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {t.type === 'in' ? '+' : '-'} {formatCurrency(t.amount)}
+                          </span>
+                          
+                          <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => handleEdit(t)}
+                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Editar"
+                            >
+                              <Edit2 size={20} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(t.id)}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                              title="Excluir"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// ==========================================
+// MÓDULO: VENDAS
+// ==========================================
+function SalesModule({ onBack }) {
+  const [sales, setSales] = useState([]);
+  const [productName, setProductName] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [editingId, setEditingId] = useState(null);
+
+  const totalSales = sales.length;
+  const totalRevenue = sales.reduce((acc, curr) => acc + curr.amount, 0);
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!productName || !amount || isNaN(amount) || amount <= 0 || !date) return;
+
+    const newSale = {
+      id: editingId || Date.now().toString(),
+      productName,
+      clientName: clientName || 'Não informado',
+      amount: parseFloat(amount),
+      date
+    };
+
+    if (editingId) {
+      setSales(sales.map(s => s.id === editingId ? newSale : s));
+      setEditingId(null);
+    } else {
+      setSales([newSale, ...sales]);
+    }
+
+    setProductName('');
+    setClientName('');
+    setAmount('');
+    setDate(new Date().toISOString().split('T')[0]);
+  };
+
+  const handleEdit = (sale) => {
+    setProductName(sale.productName);
+    setClientName(sale.clientName === 'Não informado' ? '' : sale.clientName);
+    setAmount(sale.amount.toString());
+    setDate(sale.date);
+    setEditingId(sale.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = (id) => {
+    setSales(sales.filter(s => s.id !== id));
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setProductName('');
+    setClientName('');
+    setAmount('');
+    setDate(new Date().toISOString().split('T')[0]);
+  };
+
+  return (
+    <div className="min-h-screen pb-20">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-black text-blue-600">IADU</h1>
+            <span className="w-1 h-6 bg-slate-200 rounded-full"></span>
+            <h2 className="text-lg font-semibold text-slate-700">Controle de Vendas</h2>
+          </div>
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <Home size={20} />
+            <span className="hidden sm:inline">Início</span>
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 mt-8 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white p-6 rounded-2xl border border-indigo-100 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 text-indigo-600 mb-2">
+              <ShoppingCart size={24} />
+              <span className="font-semibold">Total de Vendas</span>
+            </div>
+            <span className="text-3xl font-bold text-slate-800">{totalSales} {totalSales === 1 ? 'venda' : 'vendas'}</span>
+          </div>
+
+          <div className="bg-indigo-600 p-6 rounded-2xl shadow-sm flex flex-col justify-between text-white">
+            <div className="flex items-center gap-2 mb-2 opacity-90">
+              <TrendingUp size={24} />
+              <span className="font-semibold">Faturamento Total</span>
+            </div>
+            <span className="text-4xl font-bold">{formatCurrency(totalRevenue)}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm sticky top-28">
+              <h3 className="text-xl font-bold text-slate-800 mb-6">
+                {editingId ? 'Editar Venda' : 'Nova Venda'}
+              </h3>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Produto/Serviço *</label>
+                  <input 
+                    type="text"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="Ex: Camiseta preta"
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Cliente (Opcional)</label>
+                  <input 
+                    type="text"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    placeholder="Nome do cliente"
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-600 mb-2">Valor (R$) *</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="0,00"
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-600 mb-2">Data *</label>
+                    <input 
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-2">
+                  <button 
+                    type="submit"
+                    className="flex-1 py-4 px-6 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    {editingId ? (
+                      <>Salvar Alteração</>
+                    ) : (
+                      <>
+                        <ShoppingCart size={24} /> Adicionar Venda
+                      </>
+                    )}
+                  </button>
+
+                  {editingId && (
+                    <button 
+                      type="button"
+                      onClick={cancelEdit}
+                      className="py-4 px-4 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    >
+                      <X size={24} />
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 bg-slate-50">
+                <h3 className="text-xl font-bold text-slate-800">Histórico de Vendas</h3>
+              </div>
+              
+              <div className="p-2">
+                {sales.length === 0 ? (
+                  <div className="text-center py-16 px-4">
+                    <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Store size={40} />
+                    </div>
+                    <h4 className="text-xl font-semibold text-slate-700 mb-2">Nenhuma venda registrada!</h4>
+                    <p className="text-slate-500">Adicione suas vendas ao lado para começar.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {sales.map((s) => (
+                      <div key={s.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-colors border border-transparent hover:border-slate-100 group">
+                        
+                        <div className="flex items-start gap-4 mb-4 sm:mb-0">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600 flex-shrink-0">
+                            <ShoppingCart size={24} />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800 text-lg">{s.productName}</p>
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 mt-1">
+                              <span className="flex items-center gap-1"><Users size={14} /> {s.clientName}</span>
+                              <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(s.date + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-6 ml-16 sm:ml-0">
+                          <span className="text-xl font-bold text-indigo-600">
+                            {formatCurrency(s.amount)}
+                          </span>
+                          
+                          <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => handleEdit(s)}
+                              className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            >
+                              <Edit2 size={20} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(s.id)}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// ==========================================
+// MÓDULO: ESTOQUE
+// ==========================================
+function InventoryModule({ onBack }) {
+  const [inventory, setInventory] = useState([]);
+  const [productName, setProductName] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [unitPrice, setUnitPrice] = useState('');
+  const [editingId, setEditingId] = useState(null);
+
+  const totalItems = inventory.reduce((acc, curr) => acc + curr.quantity, 0);
+  const totalValue = inventory.reduce((acc, curr) => acc + (curr.quantity * curr.unitPrice), 0);
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!productName || !quantity || isNaN(quantity) || !unitPrice || isNaN(unitPrice)) return;
+
+    const newItem = {
+      id: editingId || Date.now().toString(),
+      productName,
+      quantity: parseInt(quantity, 10),
+      unitPrice: parseFloat(unitPrice)
+    };
+
+    if (editingId) {
+      setInventory(inventory.map(i => i.id === editingId ? newItem : i));
+      setEditingId(null);
+    } else {
+      setInventory([newItem, ...inventory]);
+    }
+
+    setProductName('');
+    setQuantity('');
+    setUnitPrice('');
+  };
+
+  const handleEdit = (item) => {
+    setProductName(item.productName);
+    setQuantity(item.quantity.toString());
+    setUnitPrice(item.unitPrice.toString());
+    setEditingId(item.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = (id) => {
+    setInventory(inventory.filter(i => i.id !== id));
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setProductName('');
+    setQuantity('');
+    setUnitPrice('');
+  };
+
+  return (
+    <div className="min-h-screen pb-20">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-black text-blue-600">IADU</h1>
+            <span className="w-1 h-6 bg-slate-200 rounded-full"></span>
+            <h2 className="text-lg font-semibold text-slate-700">Controle de Estoque</h2>
+          </div>
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <Home size={20} />
+            <span className="hidden sm:inline">Início</span>
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 mt-8 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white p-6 rounded-2xl border border-amber-100 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 text-amber-600 mb-2">
+              <Box size={24} />
+              <span className="font-semibold">Itens no Estoque</span>
+            </div>
+            <span className="text-3xl font-bold text-slate-800">{totalItems} {totalItems === 1 ? 'unidade' : 'unidades'}</span>
+          </div>
+
+          <div className="bg-amber-500 p-6 rounded-2xl shadow-sm flex flex-col justify-between text-white">
+            <div className="flex items-center gap-2 mb-2 opacity-90">
+              <DollarSign size={24} />
+              <span className="font-semibold">Valor Total em Estoque</span>
+            </div>
+            <span className="text-4xl font-bold">{formatCurrency(totalValue)}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm sticky top-28">
+              <h3 className="text-xl font-bold text-slate-800 mb-6">
+                {editingId ? 'Editar Produto' : 'Novo Produto'}
+              </h3>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Nome do Produto *</label>
+                  <input 
+                    type="text"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="Ex: Teclado Mecânico"
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-600 mb-2">Quantidade *</label>
+                    <input 
+                      type="number"
+                      min="0"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      placeholder="0"
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-600 mb-2">Valor Unid. (R$) *</label>
+                    <input 
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={unitPrice}
+                      onChange={(e) => setUnitPrice(e.target.value)}
+                      placeholder="0,00"
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-2">
+                  <button 
+                    type="submit"
+                    className="flex-1 py-4 px-6 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 transition-transform hover:-translate-y-1 bg-amber-500 hover:bg-amber-600"
+                  >
+                    {editingId ? (
+                      <>Salvar</>
+                    ) : (
+                      <>
+                        <Package size={24} /> Adicionar
+                      </>
+                    )}
+                  </button>
+
+                  {editingId && (
+                    <button 
+                      type="button"
+                      onClick={cancelEdit}
+                      className="py-4 px-4 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    >
+                      <X size={24} />
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 bg-slate-50">
+                <h3 className="text-xl font-bold text-slate-800">Lista de Produtos</h3>
+              </div>
+              
+              <div className="p-2">
+                {inventory.length === 0 ? (
+                  <div className="text-center py-16 px-4">
+                    <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Package size={40} />
+                    </div>
+                    <h4 className="text-xl font-semibold text-slate-700 mb-2">Estoque vazio!</h4>
+                    <p className="text-slate-500">Adicione seus produtos ao lado para começar o controle.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {inventory.map((i) => (
+                      <div key={i.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-colors border border-transparent hover:border-slate-100 group">
+                        
+                        <div className="flex items-start gap-4 mb-4 sm:mb-0">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-amber-100 text-amber-600 flex-shrink-0">
+                            <Box size={24} />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800 text-lg">{i.productName}</p>
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 mt-1">
+                              <span className="flex items-center gap-1"><Layers size={14} /> {i.quantity} unid.</span>
+                              <span className="flex items-center gap-1"><DollarSign size={14} /> {formatCurrency(i.unitPrice)} / unid.</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-6 ml-16 sm:ml-0">
+                          <div className="text-right">
+                            <p className="text-sm text-slate-400 font-medium mb-1">Total</p>
+                            <span className="text-xl font-bold text-amber-600">
+                              {formatCurrency(i.quantity * i.unitPrice)}
+                           </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => handleEdit(i)}
+                              className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                            >
+                              <Edit2 size={20} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(i.id)}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
