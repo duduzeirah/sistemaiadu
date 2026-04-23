@@ -1,128 +1,715 @@
-Crie um sistema web completo chamado “IADU”, projetado para rodar diretamente no navegador e ser hospedado no GitHub Pages (sem necessidade de backend).
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IADU - Soluções Simples</title>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
 
-OBJETIVO:
-Criar um sistema extremamente simples, intuitivo e funcional, onde qualquer pessoa consiga usar sem explicação.
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
 
-TECNOLOGIAS:
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
 
-* HTML
-* CSS
-* JavaScript puro (sem frameworks)
-* Armazenamento usando localStorage (para salvar dados do usuário no navegador)
+        /* Utilidades */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        
+        /* Transições */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-ESTRUTURA DO PROJETO:
+        /* TELA INICIAL */
+        #home-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
 
-* index.html
-* style.css
-* script.js
+        .logo {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: -0.05em;
+            margin-bottom: 2rem;
+        }
 
-FUNCIONAMENTO GERAL:
-O sistema deve funcionar como um “gerador de soluções simples”, onde o usuário escolhe um problema e o sistema exibe automaticamente um módulo pronto para uso.
+        .home-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #334155;
+            margin-bottom: 3rem;
+        }
 
-IMPORTANTE:
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 900px;
+        }
 
-* Todos os módulos devem estar implementados
-* Apenas um módulo deve aparecer por vez
-* Não usar backend
-* Tudo deve funcionar offline após carregamento inicial
+        .option-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
 
-INTERFACE:
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            border-color: var(--primary);
+        }
 
-1. TELA INICIAL:
+        .option-card i {
+            color: #94a3b8;
+            transition: color 0.3s;
+        }
 
-* Tela limpa e minimalista
-* Texto central: “O que você quer resolver hoje?”
-* Três botões grandes:
+        .option-card:hover i { color: var(--primary); }
 
-  * “Controlar dinheiro”
-  * “Controlar vendas”
-  * “Controlar estoque”
+        .option-card span {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #475569;
+        }
 
-2. TRANSIÇÃO:
+        /* LOADING */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
 
-* Ao clicar em uma opção, mostrar uma barra de progresso simples (simulada com JavaScript)
-* Após o carregamento, esconder a tela inicial e exibir o módulo escolhido
+        .progress-container {
+            width: 300px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
 
-3. SISTEMA MODULAR:
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
 
-* Cada módulo deve estar em uma “section”
-* Usar JavaScript para mostrar/ocultar módulos
-* Nunca exibir mais de um módulo ao mesmo tempo
+        /* MÓDULOS (ESTRUTURA GERAL) */
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
 
-MÓDULOS:
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-MÓDULO FINANCEIRO:
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            background: #f1f5f9;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+        }
 
-* Input: valor de entrada
-* Input: valor de saída
-* Botão: adicionar
-* Lista dinâmica com histórico
-* Cada item com botão de editar e excluir
-* Cálculo automático:
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
 
-  * total de entradas
-  * total de saídas
-  * saldo atual
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
 
-MÓDULO VENDAS:
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
 
-* Input: nome do produto
-* Input: cliente
-* Input: valor
-* Input: data
-* Botão: adicionar venda
-* Lista de vendas
-* Cada item com editar e excluir
-* Cálculo automático:
+        .stat-label { font-size: 0.875rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; }
 
-  * total de vendas
-  * faturamento total
+        .module-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
 
-MÓDULO ESTOQUE:
+        @media (max-width: 768px) {
+            .module-layout { grid-template-columns: 1fr; }
+        }
 
-* Input: nome do produto
-* Input: quantidade
-* Input: valor unitário
-* Botão: adicionar produto
-* Lista de produtos
-* Cada item com editar e excluir
-* Cálculo automático:
+        /* FORMULÁRIOS */
+        .form-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            height: fit-content;
+        }
 
-  * quantidade total
-  * valor total em estoque
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.4rem; color: #475569; }
+        
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+        }
 
-ARMAZENAMENTO:
+        input:focus { border-color: var(--primary); ring: 2px solid #bfdbfe; }
 
-* Usar localStorage para salvar:
+        button.primary-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-  * dados financeiros
-  * vendas
-  * estoque
-* Os dados devem persistir mesmo após recarregar a página
+        /* LISTAS */
+        .list-container {
+            background: white;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
 
-EXPERIÊNCIA DO USUÁRIO:
+        .list-header {
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+        }
 
-* Interface extremamente simples
-* Botões grandes
-* Texto claro
-* Sem menus complexos
-* Sem necessidade de login
+        .list-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-DESIGN:
+        .item-info h4 { font-weight: 700; color: #334155; }
+        .item-info p { font-size: 0.875rem; color: #94a3b8; }
 
-* Visual moderno e minimalista
-* Fundo claro
-* Elementos bem espaçados
-* Foco em clareza, não em complexidade
+        .item-actions { display: flex; gap: 0.5rem; }
+        .action-btn {
+            border: none;
+            background: transparent;
+            padding: 0.4rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+        }
 
-EXTRAS IMPORTANTES:
+        .edit-btn { color: var(--primary); background: #eff6ff; }
+        .delete-btn { color: var(--danger); background: #fef2f2; }
 
-* Botão para voltar à tela inicial
-* Animações leves (fade ou transição simples)
-* Código bem organizado e comentado
+    </style>
+</head>
+<body>
 
-RESULTADO FINAL:
-Um sistema funcional onde o usuário entra, escolhe uma opção e começa a usar imediatamente, com dados sendo salvos no navegador.
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="hidden">
+        <h1 class="logo">IADU</h1>
+        <p style="font-weight: 600; color: #64748b">Preparando sua solução...</p>
+        <div class="progress-container">
+            <div id="bar" class="progress-bar"></div>
+        </div>
+    </div>
 
-Nome do sistema deve aparecer como:
-“IADU”
+    <!-- HOME SCREEN -->
+    <div id="home-screen">
+        <h1 class="logo">IADU</h1>
+        <h2 class="home-title">O que você quer resolver hoje?</h2>
+        
+        <div class="options-grid">
+            <div class="option-card" onclick="openModule('finance')">
+                <i data-lucide="wallet" size="48"></i>
+                <span>Controlar dinheiro</span>
+            </div>
+            <div class="option-card" onclick="openModule('sales')">
+                <i data-lucide="shopping-cart" size="48"></i>
+                <span>Controlar vendas</span>
+            </div>
+            <div class="option-card" onclick="openModule('inventory')">
+                <i data-lucide="package" size="48"></i>
+                <span>Controlar estoque</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO FINANCEIRO -->
+    <div id="mod-finance" class="hidden fade-in">
+        <header>
+            <div class="header-content">
+                <h2 style="font-weight: 900; color: var(--primary)">IADU | Financeiro</h2>
+                <button class="back-btn" onclick="goHome()"><i data-lucide="home" size="18"></i> Início</button>
+            </div>
+        </header>
+        <main>
+            <div class="stats-grid">
+                <div class="stat-card" style="border-left: 5px solid var(--success)">
+                    <p class="stat-label">Entradas</p>
+                    <p id="fin-in-total" class="stat-value" style="color: var(--success)">R$ 0,00</p>
+                </div>
+                <div class="stat-card" style="border-left: 5px solid var(--danger)">
+                    <p class="stat-label">Saídas</p>
+                    <p id="fin-out-total" class="stat-value" style="color: var(--danger)">R$ 0,00</p>
+                </div>
+                <div id="fin-balance-card" class="stat-card" style="background: var(--primary); color: white">
+                    <p class="stat-label" style="color: rgba(255,255,255,0.8)">Saldo Atual</p>
+                    <p id="fin-balance" class="stat-value">R$ 0,00</p>
+                </div>
+            </div>
+
+            <div class="module-layout">
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1.5rem">Nova Movimentação</h3>
+                    <input type="hidden" id="fin-id">
+                    <div class="input-group">
+                        <label>Tipo</label>
+                        <select id="fin-type">
+                            <option value="in">Entrada (+)</option>
+                            <option value="out">Saída (-)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Descrição</label>
+                        <input type="text" id="fin-desc" placeholder="Ex: Salário, Aluguel...">
+                    </div>
+                    <div class="input-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="fin-val" step="0.01" placeholder="0,00">
+                    </div>
+                    <button class="primary-btn" onclick="saveFinance()">Salvar</button>
+                </div>
+                <div class="list-container">
+                    <div class="list-header">Histórico de Transações</div>
+                    <div id="fin-list">
+                        <!-- Itens aqui -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MÓDULO VENDAS -->
+    <div id="mod-sales" class="hidden fade-in">
+        <header>
+            <div class="header-content">
+                <h2 style="font-weight: 900; color: #8b5cf6">IADU | Vendas</h2>
+                <button class="back-btn" onclick="goHome()"><i data-lucide="home" size="18"></i> Início</button>
+            </div>
+        </header>
+        <main>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p class="stat-label">Qtd. de Vendas</p>
+                    <p id="sales-count" class="stat-value">0</p>
+                </div>
+                <div class="stat-card" style="background: #8b5cf6; color: white">
+                    <p class="stat-label" style="color: rgba(255,255,255,0.8)">Faturamento Total</p>
+                    <p id="sales-revenue" class="stat-value">R$ 0,00</p>
+                </div>
+            </div>
+            <div class="module-layout">
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1.5rem">Registrar Venda</h3>
+                    <input type="hidden" id="sale-id">
+                    <div class="input-group">
+                        <label>Produto</label>
+                        <input type="text" id="sale-prod" placeholder="Nome do produto">
+                    </div>
+                    <div class="input-group">
+                        <label>Cliente</label>
+                        <input type="text" id="sale-client" placeholder="Nome do cliente">
+                    </div>
+                    <div class="input-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="sale-val" step="0.01" placeholder="0,00">
+                    </div>
+                    <div class="input-group">
+                        <label>Data</label>
+                        <input type="date" id="sale-date">
+                    </div>
+                    <button class="primary-btn" style="background: #8b5cf6" onclick="saveSale()">Adicionar Venda</button>
+                </div>
+                <div class="list-container">
+                    <div class="list-header">Relatório de Vendas</div>
+                    <div id="sales-list"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MÓDULO ESTOQUE -->
+    <div id="mod-inventory" class="hidden fade-in">
+        <header>
+            <div class="header-content">
+                <h2 style="font-weight: 900; color: var(--warning)">IADU | Estoque</h2>
+                <button class="back-btn" onclick="goHome()"><i data-lucide="home" size="18"></i> Início</button>
+            </div>
+        </header>
+        <main>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p class="stat-label">Total de Itens</p>
+                    <p id="inv-count" class="stat-value">0</p>
+                </div>
+                <div class="stat-card" style="background: var(--warning); color: white">
+                    <p class="stat-label" style="color: rgba(255,255,255,0.8)">Valor em Mercadoria</p>
+                    <p id="inv-total-value" class="stat-value">R$ 0,00</p>
+                </div>
+            </div>
+            <div class="module-layout">
+                <div class="form-container">
+                    <h3 style="margin-bottom: 1.5rem">Novo Produto</h3>
+                    <input type="hidden" id="inv-id">
+                    <div class="input-group">
+                        <label>Nome do Produto</label>
+                        <input type="text" id="inv-name" placeholder="Ex: Camiseta">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="inv-qty" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Valor Unitário (R$)</label>
+                        <input type="number" id="inv-unit" step="0.01" placeholder="0,00">
+                    </div>
+                    <button class="primary-btn" style="background: var(--warning)" onclick="saveInventory()">Salvar no Estoque</button>
+                </div>
+                <div class="list-container">
+                    <div class="list-header">Produtos em Estoque</div>
+                    <div id="inv-list"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- INICIALIZAÇÃO E NAVEGAÇÃO ---
+        lucide.createIcons();
+        
+        let db = {
+            finance: JSON.parse(localStorage.getItem('iadu_finance')) || [],
+            sales: JSON.parse(localStorage.getItem('iadu_sales')) || [],
+            inventory: JSON.parse(localStorage.getItem('iadu_inventory')) || []
+        };
+
+        function openModule(modId) {
+            document.getElementById('home-screen').classList.add('hidden');
+            const loading = document.getElementById('loading-screen');
+            const bar = document.getElementById('bar');
+            loading.classList.remove('hidden');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                bar.style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loading.classList.add('hidden');
+                        document.getElementById('mod-' + modId).classList.remove('hidden');
+                        bar.style.width = '0%';
+                        renderModule(modId);
+                    }, 200);
+                }
+            }, 20);
+        }
+
+        function goHome() {
+            document.querySelectorAll('[id^="mod-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById('home-screen').classList.remove('hidden');
+        }
+
+        function formatBRL(val) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        }
+
+        // --- LÓGICA FINANCEIRA ---
+        function renderFinance() {
+            const list = document.getElementById('fin-list');
+            list.innerHTML = '';
+            let inTotal = 0, outTotal = 0;
+
+            db.finance.forEach(item => {
+                if (item.type === 'in') inTotal += item.val;
+                else outTotal += item.val;
+
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <h4>${item.desc}</h4>
+                            <p>${item.type === 'in' ? 'Entrada' : 'Saída'}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span style="font-weight: 800; color: ${item.type === 'in' ? 'var(--success)' : 'var(--danger)'}">
+                                ${item.type === 'in' ? '+' : '-'} ${formatBRL(item.val)}
+                            </span>
+                            <div class="item-actions">
+                                <button class="action-btn edit-btn" onclick="editFinance('${item.id}')"><i data-lucide="edit-2"></i></button>
+                                <button class="action-btn delete-btn" onclick="deleteFinance('${item.id}')"><i data-lucide="trash-2"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('fin-in-total').innerText = formatBRL(inTotal);
+            document.getElementById('fin-out-total').innerText = formatBRL(outTotal);
+            const balance = inTotal - outTotal;
+            document.getElementById('fin-balance').innerText = formatBRL(balance);
+            document.getElementById('fin-balance-card').style.background = balance >= 0 ? 'var(--primary)' : 'var(--danger)';
+            lucide.createIcons();
+        }
+
+        function saveFinance() {
+            const id = document.getElementById('fin-id').value;
+            const desc = document.getElementById('fin-desc').value;
+            const val = parseFloat(document.getElementById('fin-val').value);
+            const type = document.getElementById('fin-type').value;
+
+            if (!desc || isNaN(val)) return;
+
+            if (id) {
+                const idx = db.finance.findIndex(i => i.id === id);
+                db.finance[idx] = { id, desc, val, type };
+            } else {
+                db.finance.unshift({ id: Date.now().toString(), desc, val, type });
+            }
+
+            localStorage.setItem('iadu_finance', JSON.stringify(db.finance));
+            renderFinance();
+            document.getElementById('fin-id').value = '';
+            document.getElementById('fin-desc').value = '';
+            document.getElementById('fin-val').value = '';
+        }
+
+        function deleteFinance(id) {
+            db.finance = db.finance.filter(i => i.id !== id);
+            localStorage.setItem('iadu_finance', JSON.stringify(db.finance));
+            renderFinance();
+        }
+
+        function editFinance(id) {
+            const item = db.finance.find(i => i.id === id);
+            document.getElementById('fin-id').value = item.id;
+            document.getElementById('fin-desc').value = item.desc;
+            document.getElementById('fin-val').value = item.val;
+            document.getElementById('fin-type').value = item.type;
+        }
+
+        // --- LÓGICA VENDAS ---
+        function renderSales() {
+            const list = document.getElementById('sales-list');
+            list.innerHTML = '';
+            let revenue = 0;
+
+            db.sales.forEach(item => {
+                revenue += item.val;
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <h4>${item.prod}</h4>
+                            <p>Cliente: ${item.client} | Data: ${item.date}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span style="font-weight: 800; color: #8b5cf6">${formatBRL(item.val)}</span>
+                            <div class="item-actions">
+                                <button class="action-btn edit-btn" onclick="editSale('${item.id}')"><i data-lucide="edit-2"></i></button>
+                                <button class="action-btn delete-btn" onclick="deleteSale('${item.id}')"><i data-lucide="trash-2"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('sales-count').innerText = db.sales.length;
+            document.getElementById('sales-revenue').innerText = formatBRL(revenue);
+            lucide.createIcons();
+        }
+
+        function saveSale() {
+            const id = document.getElementById('sale-id').value;
+            const prod = document.getElementById('sale-prod').value;
+            const client = document.getElementById('sale-client').value;
+            const val = parseFloat(document.getElementById('sale-val').value);
+            const date = document.getElementById('sale-date').value;
+
+            if (!prod || isNaN(val)) return;
+
+            if (id) {
+                const idx = db.sales.findIndex(i => i.id === id);
+                db.sales[idx] = { id, prod, client, val, date };
+            } else {
+                db.sales.unshift({ id: Date.now().toString(), prod, client, val, date });
+            }
+
+            localStorage.setItem('iadu_sales', JSON.stringify(db.sales));
+            renderSales();
+            ['sale-id','sale-prod','sale-client','sale-val','sale-date'].forEach(i => document.getElementById(i).value = '');
+        }
+
+        function deleteSale(id) {
+            db.sales = db.sales.filter(i => i.id !== id);
+            localStorage.setItem('iadu_sales', JSON.stringify(db.sales));
+            renderSales();
+        }
+
+        function editSale(id) {
+            const item = db.sales.find(i => i.id === id);
+            document.getElementById('sale-id').value = item.id;
+            document.getElementById('sale-prod').value = item.prod;
+            document.getElementById('sale-client').value = item.client;
+            document.getElementById('sale-val').value = item.val;
+            document.getElementById('sale-date').value = item.date;
+        }
+
+        // --- LÓGICA ESTOQUE ---
+        function renderInventory() {
+            const list = document.getElementById('inv-list');
+            list.innerHTML = '';
+            let totalQty = 0, totalVal = 0;
+
+            db.inventory.forEach(item => {
+                totalQty += item.qty;
+                totalVal += (item.qty * item.unit);
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.qty} un x ${formatBRL(item.unit)}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span style="font-weight: 800; color: var(--warning)">${formatBRL(item.qty * item.unit)}</span>
+                            <div class="item-actions">
+                                <button class="action-btn edit-btn" onclick="editInventory('${item.id}')"><i data-lucide="edit-2"></i></button>
+                                <button class="action-btn delete-btn" onclick="deleteInventory('${item.id}')"><i data-lucide="trash-2"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('inv-count').innerText = totalQty;
+            document.getElementById('inv-total-value').innerText = formatBRL(totalVal);
+            lucide.createIcons();
+        }
+
+        function saveInventory() {
+            const id = document.getElementById('inv-id').value;
+            const name = document.getElementById('inv-name').value;
+            const qty = parseInt(document.getElementById('inv-qty').value);
+            const unit = parseFloat(document.getElementById('inv-unit').value);
+
+            if (!name || isNaN(qty) || isNaN(unit)) return;
+
+            if (id) {
+                const idx = db.inventory.findIndex(i => i.id === id);
+                db.inventory[idx] = { id, name, qty, unit };
+            } else {
+                db.inventory.unshift({ id: Date.now().toString(), name, qty, unit });
+            }
+
+            localStorage.setItem('iadu_inventory', JSON.stringify(db.inventory));
+            renderInventory();
+            ['inv-id','inv-name','inv-qty','inv-unit'].forEach(i => document.getElementById(i).value = '');
+        }
+
+        function deleteInventory(id) {
+            db.inventory = db.inventory.filter(i => i.id !== id);
+            localStorage.setItem('iadu_inventory', JSON.stringify(db.inventory));
+            renderInventory();
+        }
+
+        function editInventory(id) {
+            const item = db.inventory.find(i => i.id === id);
+            document.getElementById('inv-id').value = item.id;
+            document.getElementById('inv-name').value = item.name;
+            document.getElementById('inv-qty').value = item.qty;
+            document.getElementById('inv-unit').value = item.unit;
+        }
+
+        // --- RENDERIZADOR GERAL ---
+        function renderModule(mod) {
+            if (mod === 'finance') renderFinance();
+            if (mod === 'sales') renderSales();
+            if (mod === 'inventory') renderInventory();
+        }
+
+    </script>
+</body>
+</html>
