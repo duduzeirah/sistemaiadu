@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IADU - Soluções Simples</title>
+    <title>IADU - Sistema Integrado</title>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -16,273 +16,94 @@
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
+            --purple: #8b5cf6;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
-            overflow-x: hidden;
-        }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.5; overflow-x: hidden; }
 
-        /* Utilidades */
         .hidden { display: none !important; }
         .flex { display: flex; }
-        
-        /* Transições */
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* TELA INICIAL */
-        #home-screen {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .logo {
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--primary);
-            letter-spacing: -0.05em;
-            margin-bottom: 2rem;
-        }
-
-        .home-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #334155;
-            margin-bottom: 3rem;
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            width: 100%;
-            max-width: 900px;
-        }
-
-        .option-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .option-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-            border-color: var(--primary);
-        }
-
-        .option-card i {
-            color: #94a3b8;
-            transition: color 0.3s;
-        }
-
+        #home-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+        .logo { font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: -0.05em; margin-bottom: 2rem; }
+        .home-title { font-size: 2.5rem; font-weight: 800; color: #334155; margin-bottom: 3rem; }
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; width: 100%; max-width: 900px; }
+        .option-card { background: var(--card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 1.5rem; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+        .option-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border-color: var(--primary); }
+        .option-card i { color: #94a3b8; transition: color 0.3s; }
         .option-card:hover i { color: var(--primary); }
-
-        .option-card span {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #475569;
-        }
+        .option-card span { font-size: 1.25rem; font-weight: 600; color: #475569; }
 
         /* LOADING */
-        #loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
+        #loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .progress-container { width: 300px; height: 8px; background: #e2e8f0; border-radius: 10px; margin-top: 2rem; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.1s linear; }
 
-        .progress-container {
-            width: 300px;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            margin-top: 2rem;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.1s linear;
-        }
-
-        /* MÓDULOS (ESTRUTURA GERAL) */
-        header {
-            background: white;
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-
-        .header-content {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .back-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: none;
-            background: #f1f5f9;
-            padding: 0.5rem 1rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-        }
-
-        main {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-        }
-
-        .stat-label { font-size: 0.875rem; color: #64748b; font-weight: 600; margin-bottom: 0.5rem; }
-        .stat-value { font-size: 1.5rem; font-weight: 800; }
-
-        .module-layout {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .module-layout { grid-template-columns: 1fr; }
-        }
+        /* HEADER & LAYOUT */
+        header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; position: sticky; top: 0; z-index: 50; }
+        .header-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { display: flex; align-items: center; gap: 0.5rem; border: none; background: #f1f5f9; padding: 0.5rem 1rem; border-radius: 0.75rem; font-weight: 600; color: #64748b; cursor: pointer; }
+        main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); }
+        .stat-label { font-size: 0.875rem; color: #64748b; font-weight: 600; margin-bottom: 0.2rem; }
+        .stat-value { font-size: 1.4rem; font-weight: 800; }
+        
+        .module-layout { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 2rem; }
+        @media (max-width: 768px) { .module-layout { grid-template-columns: 1fr; } }
 
         /* FORMULÁRIOS */
-        .form-container {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            height: fit-content;
-        }
-
+        .form-container { background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); height: fit-content; position: sticky; top: 90px; }
         .input-group { margin-bottom: 1rem; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
         label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.4rem; color: #475569; }
+        input, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; font-size: 1rem; outline: none; transition: border 0.2s; }
+        input:focus { border-color: var(--primary); }
         
-        input, select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            outline: none;
-        }
+        button.primary-btn { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 0.75rem; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 0.5rem; transition: filter 0.2s; }
+        button.primary-btn:hover { filter: brightness(1.1); }
 
-        input:focus { border-color: var(--primary); ring: 2px solid #bfdbfe; }
+        /* BADGES */
+        .badge { font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 2rem; text-transform: uppercase; }
+        .badge-auto { background: #ede9fe; color: var(--purple); }
+        .badge-manual { background: #f1f5f9; color: #64748b; }
 
-        button.primary-btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
-        }
+        /* RESULTADO FINAL BOX */
+        .total-box { background: #f0f9ff; border: 2px dashed #bae6fd; padding: 1rem; border-radius: 0.75rem; margin-top: 1rem; margin-bottom: 1rem; }
+        .total-label { font-size: 0.8rem; font-weight: 700; color: #0369a1; text-transform: uppercase; }
+        .total-price { font-size: 1.75rem; font-weight: 900; color: #0c4a6e; }
 
         /* LISTAS */
-        .list-container {
-            background: white;
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .list-header {
-            padding: 1rem 1.5rem;
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border);
-            font-weight: 700;
-        }
-
-        .list-item {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #f1f5f9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .item-info h4 { font-weight: 700; color: #334155; }
-        .item-info p { font-size: 0.875rem; color: #94a3b8; }
-
+        .list-container { background: white; border-radius: 1rem; border: 1px solid var(--border); overflow: hidden; }
+        .list-header { padding: 1rem 1.5rem; background: #f8fafc; border-bottom: 1px solid var(--border); font-weight: 700; display: flex; justify-content: space-between; }
+        .list-item { padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .item-info h4 { font-weight: 700; color: #334155; margin-bottom: 0.1rem; }
+        .item-info p { font-size: 0.8rem; color: #94a3b8; }
         .item-actions { display: flex; gap: 0.5rem; }
-        .action-btn {
-            border: none;
-            background: transparent;
-            padding: 0.4rem;
-            border-radius: 0.4rem;
-            cursor: pointer;
-        }
-
-        .edit-btn { color: var(--primary); background: #eff6ff; }
+        .action-btn { border: none; background: transparent; padding: 0.4rem; border-radius: 0.4rem; cursor: pointer; }
         .delete-btn { color: var(--danger); background: #fef2f2; }
 
+        #toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--danger); color: white; padding: 1rem 2rem; border-radius: 0.75rem; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 1000; transition: opacity 0.3s; }
     </style>
 </head>
 <body>
 
+    <div id="toast" class="hidden"></div>
+
     <!-- LOADING SCREEN -->
     <div id="loading-screen" class="hidden">
         <h1 class="logo">IADU</h1>
-        <p style="font-weight: 600; color: #64748b">Preparando sua solução...</p>
+        <p style="font-weight: 600; color: #64748b">Integrando dados...</p>
         <div class="progress-container">
             <div id="bar" class="progress-bar"></div>
         </div>
@@ -291,25 +112,24 @@
     <!-- HOME SCREEN -->
     <div id="home-screen">
         <h1 class="logo">IADU</h1>
-        <h2 class="home-title">O que você quer resolver hoje?</h2>
-        
+        <h2 class="home-title">Gestão Inteligente & Integrada</h2>
         <div class="options-grid">
             <div class="option-card" onclick="openModule('finance')">
                 <i data-lucide="wallet" size="48"></i>
-                <span>Controlar dinheiro</span>
+                <span>Módulo Financeiro</span>
             </div>
             <div class="option-card" onclick="openModule('sales')">
                 <i data-lucide="shopping-cart" size="48"></i>
-                <span>Controlar vendas</span>
+                <span>Módulo de Vendas</span>
             </div>
             <div class="option-card" onclick="openModule('inventory')">
                 <i data-lucide="package" size="48"></i>
-                <span>Controlar estoque</span>
+                <span>Módulo de Estoque</span>
             </div>
         </div>
     </div>
 
-    <!-- MÓDULO FINANCEIRO -->
+    <!-- MÓDULO FINANCEIRO (COM RELATÓRIOS DO DIA/MÊS) -->
     <div id="mod-finance" class="hidden fade-in">
         <header>
             <div class="header-content">
@@ -319,24 +139,27 @@
         </header>
         <main>
             <div class="stats-grid">
-                <div class="stat-card" style="border-left: 5px solid var(--success)">
-                    <p class="stat-label">Entradas</p>
-                    <p id="fin-in-total" class="stat-value" style="color: var(--success)">R$ 0,00</p>
+                <div class="stat-card" style="border-bottom: 4px solid var(--success)">
+                    <p class="stat-label">Ganhos de Hoje</p>
+                    <p id="fin-today-in" class="stat-value" style="color: var(--success)">R$ 0,00</p>
                 </div>
-                <div class="stat-card" style="border-left: 5px solid var(--danger)">
-                    <p class="stat-label">Saídas</p>
-                    <p id="fin-out-total" class="stat-value" style="color: var(--danger)">R$ 0,00</p>
+                <div class="stat-card" style="border-bottom: 4px solid var(--purple)">
+                    <p class="stat-label">Ganhos do Mês</p>
+                    <p id="fin-month-in" class="stat-value" style="color: var(--purple)">R$ 0,00</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Total Saídas</p>
+                    <p id="fin-total-out" class="stat-value" style="color: var(--danger)">R$ 0,00</p>
                 </div>
                 <div id="fin-balance-card" class="stat-card" style="background: var(--primary); color: white">
                     <p class="stat-label" style="color: rgba(255,255,255,0.8)">Saldo Atual</p>
                     <p id="fin-balance" class="stat-value">R$ 0,00</p>
                 </div>
             </div>
-
             <div class="module-layout">
                 <div class="form-container">
-                    <h3 style="margin-bottom: 1.5rem">Nova Movimentação</h3>
-                    <input type="hidden" id="fin-id">
+                    <h3>Novo Lançamento Manual</h3>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1rem;">Vendas são lançadas automaticamente.</p>
                     <div class="input-group">
                         <label>Tipo</label>
                         <select id="fin-type">
@@ -346,19 +169,20 @@
                     </div>
                     <div class="input-group">
                         <label>Descrição</label>
-                        <input type="text" id="fin-desc" placeholder="Ex: Salário, Aluguel...">
+                        <input type="text" id="fin-desc" placeholder="Ex: Aluguel, Prolabore...">
                     </div>
                     <div class="input-group">
                         <label>Valor (R$)</label>
-                        <input type="number" id="fin-val" step="0.01" placeholder="0,00">
+                        <input type="number" id="fin-val" step="0.01">
                     </div>
-                    <button class="primary-btn" onclick="saveFinance()">Salvar</button>
+                    <button class="primary-btn" onclick="saveFinanceManual()">Registrar Lançamento</button>
                 </div>
                 <div class="list-container">
-                    <div class="list-header">Histórico de Transações</div>
-                    <div id="fin-list">
-                        <!-- Itens aqui -->
+                    <div class="list-header">
+                        <span>Fluxo de Caixa</span>
+                        <span style="font-size: 0.75rem; color: #94a3b8">Recentes</span>
                     </div>
+                    <div id="fin-list"></div>
                 </div>
             </div>
         </main>
@@ -368,45 +192,64 @@
     <div id="mod-sales" class="hidden fade-in">
         <header>
             <div class="header-content">
-                <h2 style="font-weight: 900; color: #8b5cf6">IADU | Vendas</h2>
+                <h2 style="font-weight: 900; color: var(--purple)">IADU | Vendas</h2>
                 <button class="back-btn" onclick="goHome()"><i data-lucide="home" size="18"></i> Início</button>
             </div>
         </header>
         <main>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <p class="stat-label">Qtd. de Vendas</p>
+                    <p class="stat-label">Itens Vendidos</p>
                     <p id="sales-count" class="stat-value">0</p>
                 </div>
-                <div class="stat-card" style="background: #8b5cf6; color: white">
+                <div class="stat-card" style="background: var(--purple); color: white">
                     <p class="stat-label" style="color: rgba(255,255,255,0.8)">Faturamento Total</p>
                     <p id="sales-revenue" class="stat-value">R$ 0,00</p>
                 </div>
             </div>
             <div class="module-layout">
                 <div class="form-container">
-                    <h3 style="margin-bottom: 1.5rem">Registrar Venda</h3>
-                    <input type="hidden" id="sale-id">
+                    <h3 style="margin-bottom: 1rem">Registrar Venda</h3>
                     <div class="input-group">
                         <label>Produto</label>
-                        <input type="text" id="sale-prod" placeholder="Nome do produto">
+                        <select id="sale-prod-select" onchange="handleProductChange()">
+                            <option value="">Selecione um produto...</option>
+                        </select>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Valor Unit. (R$)</label>
+                            <input type="number" id="sale-unit-price" step="0.01" oninput="calculateSale()">
+                        </div>
+                        <div class="input-group">
+                            <label>Quantidade</label>
+                            <input type="number" id="sale-qty" value="1" min="1" oninput="calculateSale()">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Desconto (%)</label>
+                            <input type="number" id="sale-desc-perc" step="0.1" placeholder="0" oninput="syncDiscount('perc')">
+                        </div>
+                        <div class="input-group">
+                            <label>Desconto (R$)</label>
+                            <input type="number" id="sale-desc-val" step="0.01" placeholder="0.00" oninput="syncDiscount('val')">
+                        </div>
                     </div>
                     <div class="input-group">
-                        <label>Cliente</label>
+                        <label>Cliente (Opcional)</label>
                         <input type="text" id="sale-client" placeholder="Nome do cliente">
                     </div>
-                    <div class="input-group">
-                        <label>Valor (R$)</label>
-                        <input type="number" id="sale-val" step="0.01" placeholder="0,00">
+                    <div class="total-box">
+                        <p class="total-label">Faturamento da Venda</p>
+                        <p id="sale-final-total" class="total-price">R$ 0,00</p>
                     </div>
-                    <div class="input-group">
-                        <label>Data</label>
-                        <input type="date" id="sale-date">
-                    </div>
-                    <button class="primary-btn" style="background: #8b5cf6" onclick="saveSale()">Adicionar Venda</button>
+                    <button class="primary-btn" style="background: var(--purple)" onclick="saveSale()">
+                        <i data-lucide="shopping-cart" size="20"></i> Finalizar Venda
+                    </button>
                 </div>
                 <div class="list-container">
-                    <div class="list-header">Relatório de Vendas</div>
+                    <div class="list-header">Últimas Vendas</div>
                     <div id="sales-list"></div>
                 </div>
             </div>
@@ -424,34 +267,33 @@
         <main>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <p class="stat-label">Total de Itens</p>
+                    <p class="stat-label">Total de Unidades</p>
                     <p id="inv-count" class="stat-value">0</p>
                 </div>
                 <div class="stat-card" style="background: var(--warning); color: white">
-                    <p class="stat-label" style="color: rgba(255,255,255,0.8)">Valor em Mercadoria</p>
+                    <p class="stat-label" style="color: rgba(255,255,255,0.8)">Custo em Prateleira</p>
                     <p id="inv-total-value" class="stat-value">R$ 0,00</p>
                 </div>
             </div>
             <div class="module-layout">
                 <div class="form-container">
-                    <h3 style="margin-bottom: 1.5rem">Novo Produto</h3>
-                    <input type="hidden" id="inv-id">
+                    <h3>Adicionar ao Estoque</h3>
                     <div class="input-group">
                         <label>Nome do Produto</label>
-                        <input type="text" id="inv-name" placeholder="Ex: Camiseta">
+                        <input type="text" id="inv-name">
                     </div>
                     <div class="input-group">
                         <label>Quantidade</label>
-                        <input type="number" id="inv-qty" placeholder="0">
+                        <input type="number" id="inv-qty">
                     </div>
                     <div class="input-group">
-                        <label>Valor Unitário (R$)</label>
-                        <input type="number" id="inv-unit" step="0.01" placeholder="0,00">
+                        <label>Preço Base de Venda (R$)</label>
+                        <input type="number" id="inv-unit" step="0.01">
                     </div>
-                    <button class="primary-btn" style="background: var(--warning)" onclick="saveInventory()">Salvar no Estoque</button>
+                    <button class="primary-btn" style="background: var(--warning)" onclick="saveInventory()">Salvar Item</button>
                 </div>
                 <div class="list-container">
-                    <div class="list-header">Produtos em Estoque</div>
+                    <div class="list-header">Produtos Atuais</div>
                     <div id="inv-list"></div>
                 </div>
             </div>
@@ -459,24 +301,32 @@
     </div>
 
     <script>
-        // --- INICIALIZAÇÃO E NAVEGAÇÃO ---
-        lucide.createIcons();
-        
+        // --- BASE DE DADOS ---
         let db = {
             finance: JSON.parse(localStorage.getItem('iadu_finance')) || [],
             sales: JSON.parse(localStorage.getItem('iadu_sales')) || [],
             inventory: JSON.parse(localStorage.getItem('iadu_inventory')) || []
         };
 
+        // --- UTILITÁRIOS ---
+        function showToast(msg, isError = true) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.background = isError ? 'var(--danger)' : 'var(--success)';
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function formatBRL(val) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val); }
+
         function openModule(modId) {
             document.getElementById('home-screen').classList.add('hidden');
             const loading = document.getElementById('loading-screen');
             const bar = document.getElementById('bar');
             loading.classList.remove('hidden');
-            
             let progress = 0;
             const interval = setInterval(() => {
-                progress += 5;
+                progress += 20;
                 bar.style.width = progress + '%';
                 if (progress >= 100) {
                     clearInterval(interval);
@@ -485,208 +335,283 @@
                         document.getElementById('mod-' + modId).classList.remove('hidden');
                         bar.style.width = '0%';
                         renderModule(modId);
-                    }, 200);
+                    }, 100);
                 }
-            }, 20);
+            }, 50);
         }
 
         function goHome() {
             document.querySelectorAll('[id^="mod-"]').forEach(el => el.classList.add('hidden'));
             document.getElementById('home-screen').classList.remove('hidden');
+            lucide.createIcons();
         }
 
-        function formatBRL(val) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-        }
-
-        // --- LÓGICA FINANCEIRA ---
+        // --- MÓDULO FINANCEIRO (INTEGRADO) ---
         function renderFinance() {
             const list = document.getElementById('fin-list');
             list.innerHTML = '';
-            let inTotal = 0, outTotal = 0;
+            
+            const now = new Date();
+            const todayStr = now.toLocaleDateString();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+
+            let todayIn = 0;
+            let monthIn = 0;
+            let totalOut = 0;
+            let totalIn = 0;
 
             db.finance.forEach(item => {
-                if (item.type === 'in') inTotal += item.val;
-                else outTotal += item.val;
+                const itemDate = new Date(item.date);
+                const isToday = item.dateString === todayStr;
+                const isThisMonth = itemDate.getMonth() === thisMonth && itemDate.getFullYear() === thisYear;
+
+                if (item.type === 'in') {
+                    totalIn += item.val;
+                    if (isToday) todayIn += item.val;
+                    if (isThisMonth) monthIn += item.val;
+                } else {
+                    totalOut += item.val;
+                }
 
                 list.innerHTML += `
                     <div class="list-item">
                         <div class="item-info">
-                            <h4>${item.desc}</h4>
-                            <p>${item.type === 'in' ? 'Entrada' : 'Saída'}</p>
+                            <div class="flex items-center gap-2">
+                                <h4>${item.desc}</h4>
+                                <span class="badge ${item.isAuto ? 'badge-auto' : 'badge-manual'}">
+                                    ${item.isAuto ? 'Venda' : 'Manual'}
+                                </span>
+                            </div>
+                            <p>${item.dateString}</p>
                         </div>
                         <div class="flex items-center gap-4">
                             <span style="font-weight: 800; color: ${item.type === 'in' ? 'var(--success)' : 'var(--danger)'}">
                                 ${item.type === 'in' ? '+' : '-'} ${formatBRL(item.val)}
                             </span>
-                            <div class="item-actions">
-                                <button class="action-btn edit-btn" onclick="editFinance('${item.id}')"><i data-lucide="edit-2"></i></button>
-                                <button class="action-btn delete-btn" onclick="deleteFinance('${item.id}')"><i data-lucide="trash-2"></i></button>
-                            </div>
+                            <button class="action-btn delete-btn" onclick="deleteFinance('${item.id}', ${item.isAuto})">
+                                <i data-lucide="trash-2" size="16"></i>
+                            </button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
 
-            document.getElementById('fin-in-total').innerText = formatBRL(inTotal);
-            document.getElementById('fin-out-total').innerText = formatBRL(outTotal);
-            const balance = inTotal - outTotal;
+            document.getElementById('fin-today-in').innerText = formatBRL(todayIn);
+            document.getElementById('fin-month-in').innerText = formatBRL(monthIn);
+            document.getElementById('fin-total-out').innerText = formatBRL(totalOut);
+            
+            const balance = totalIn - totalOut;
             document.getElementById('fin-balance').innerText = formatBRL(balance);
             document.getElementById('fin-balance-card').style.background = balance >= 0 ? 'var(--primary)' : 'var(--danger)';
             lucide.createIcons();
         }
 
-        function saveFinance() {
-            const id = document.getElementById('fin-id').value;
+        function saveFinanceManual() {
             const desc = document.getElementById('fin-desc').value;
             const val = parseFloat(document.getElementById('fin-val').value);
             const type = document.getElementById('fin-type').value;
 
-            if (!desc || isNaN(val)) return;
+            if (!desc || isNaN(val)) return showToast("Preencha os campos corretamente");
 
-            if (id) {
-                const idx = db.finance.findIndex(i => i.id === id);
-                db.finance[idx] = { id, desc, val, type };
-            } else {
-                db.finance.unshift({ id: Date.now().toString(), desc, val, type });
-            }
+            const now = new Date();
+            db.finance.unshift({
+                id: Date.now().toString(),
+                desc,
+                val,
+                type,
+                date: now.getTime(),
+                dateString: now.toLocaleDateString(),
+                isAuto: false
+            });
 
             localStorage.setItem('iadu_finance', JSON.stringify(db.finance));
-            renderFinance();
-            document.getElementById('fin-id').value = '';
-            document.getElementById('fin-desc').value = '';
+            document.getElementById('fin-desc').value = ''; 
             document.getElementById('fin-val').value = '';
+            renderFinance();
+            showToast("Lançamento realizado!", false);
         }
 
-        function deleteFinance(id) {
+        function deleteFinance(id, isAuto) {
+            if(isAuto) {
+                showToast("Para remover esta entrada, apague a venda correspondente no módulo de vendas.");
+                return;
+            }
             db.finance = db.finance.filter(i => i.id !== id);
             localStorage.setItem('iadu_finance', JSON.stringify(db.finance));
             renderFinance();
         }
 
-        function editFinance(id) {
-            const item = db.finance.find(i => i.id === id);
-            document.getElementById('fin-id').value = item.id;
-            document.getElementById('fin-desc').value = item.desc;
-            document.getElementById('fin-val').value = item.val;
-            document.getElementById('fin-type').value = item.type;
+        // --- MÓDULO VENDAS (COM GATILHO FINANCEIRO) ---
+        function handleProductChange() {
+            const prodId = document.getElementById('sale-prod-select').value;
+            if (!prodId) {
+                document.getElementById('sale-unit-price').value = '';
+                calculateSale();
+                return;
+            }
+            const product = db.inventory.find(p => p.id === prodId);
+            if (product) {
+                document.getElementById('sale-unit-price').value = product.unit;
+                calculateSale();
+            }
         }
 
-        // --- LÓGICA VENDAS ---
+        function syncDiscount(origin) {
+            const unitPrice = parseFloat(document.getElementById('sale-unit-price').value) || 0;
+            const qty = parseInt(document.getElementById('sale-qty').value) || 0;
+            const totalOriginal = unitPrice * qty;
+            if (totalOriginal === 0) return;
+
+            if (origin === 'perc') {
+                const perc = parseFloat(document.getElementById('sale-desc-perc').value) || 0;
+                document.getElementById('sale-desc-val').value = (totalOriginal * (Math.min(perc, 100) / 100)).toFixed(2);
+            } else {
+                const val = parseFloat(document.getElementById('sale-desc-val').value) || 0;
+                document.getElementById('sale-desc-perc').value = ((Math.min(val, totalOriginal) / totalOriginal) * 100).toFixed(1);
+            }
+            calculateSale();
+        }
+
+        function calculateSale() {
+            const unitPrice = parseFloat(document.getElementById('sale-unit-price').value) || 0;
+            const qty = parseInt(document.getElementById('sale-qty').value) || 0;
+            const discount = parseFloat(document.getElementById('sale-desc-val').value) || 0;
+            const finalValue = Math.max(0, (unitPrice * qty) - discount);
+            document.getElementById('sale-final-total').innerText = formatBRL(finalValue);
+        }
+
         function renderSales() {
+            const select = document.getElementById('sale-prod-select');
+            select.innerHTML = '<option value="">Selecione um produto...</option>';
+            db.inventory.forEach(p => {
+                select.innerHTML += `<option value="${p.id}" ${p.qty <= 0 ? 'disabled' : ''}>${p.name} (${p.qty} un)</option>`;
+            });
+
             const list = document.getElementById('sales-list');
             list.innerHTML = '';
             let revenue = 0;
-
-            db.sales.forEach(item => {
-                revenue += item.val;
+            db.sales.forEach(sale => {
+                revenue += sale.finalValue;
                 list.innerHTML += `
                     <div class="list-item">
                         <div class="item-info">
-                            <h4>${item.prod}</h4>
-                            <p>Cliente: ${item.client} | Data: ${item.date}</p>
+                            <h4>${sale.prodName}</h4>
+                            <p>${sale.qty} un | Desc: ${formatBRL(sale.discount)} | ${sale.date}</p>
                         </div>
                         <div class="flex items-center gap-4">
-                            <span style="font-weight: 800; color: #8b5cf6">${formatBRL(item.val)}</span>
-                            <div class="item-actions">
-                                <button class="action-btn edit-btn" onclick="editSale('${item.id}')"><i data-lucide="edit-2"></i></button>
-                                <button class="action-btn delete-btn" onclick="deleteSale('${item.id}')"><i data-lucide="trash-2"></i></button>
-                            </div>
+                            <span style="font-weight: 800; color: var(--purple)">${formatBRL(sale.finalValue)}</span>
+                            <button class="action-btn delete-btn" onclick="deleteSale('${sale.id}')"><i data-lucide="trash-2" size="16"></i></button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
-
             document.getElementById('sales-count').innerText = db.sales.length;
             document.getElementById('sales-revenue').innerText = formatBRL(revenue);
             lucide.createIcons();
         }
 
         function saveSale() {
-            const id = document.getElementById('sale-id').value;
-            const prod = document.getElementById('sale-prod').value;
+            const prodId = document.getElementById('sale-prod-select').value;
+            const unitPrice = parseFloat(document.getElementById('sale-unit-price').value);
+            const qty = parseInt(document.getElementById('sale-qty').value);
+            const discount = parseFloat(document.getElementById('sale-desc-val').value) || 0;
             const client = document.getElementById('sale-client').value;
-            const val = parseFloat(document.getElementById('sale-val').value);
-            const date = document.getElementById('sale-date').value;
 
-            if (!prod || isNaN(val)) return;
+            if (!prodId || isNaN(unitPrice) || isNaN(qty) || qty < 1) return showToast("Dados de venda incompletos.");
 
-            if (id) {
-                const idx = db.sales.findIndex(i => i.id === id);
-                db.sales[idx] = { id, prod, client, val, date };
-            } else {
-                db.sales.unshift({ id: Date.now().toString(), prod, client, val, date });
-            }
+            const product = db.inventory.find(p => p.id === prodId);
+            if (product.qty < qty) return showToast("Estoque insuficiente.");
+
+            const finalValue = (unitPrice * qty) - discount;
+            const saleId = Date.now().toString();
+            const now = new Date();
+
+            // 1. Atualizar Estoque
+            product.qty -= qty;
+            
+            // 2. Registrar Venda
+            db.sales.unshift({
+                id: saleId,
+                prodName: product.name,
+                qty,
+                discount,
+                finalValue,
+                date: now.toLocaleDateString()
+            });
+
+            // 3. Registrar no Financeiro (AUTOMÁTICO)
+            db.finance.unshift({
+                id: "FIN_" + saleId,
+                desc: `Venda - ${product.name}`,
+                val: finalValue,
+                type: 'in',
+                date: now.getTime(),
+                dateString: now.toLocaleDateString(),
+                isAuto: true,
+                saleRef: saleId
+            });
 
             localStorage.setItem('iadu_sales', JSON.stringify(db.sales));
+            localStorage.setItem('iadu_inventory', JSON.stringify(db.inventory));
+            localStorage.setItem('iadu_finance', JSON.stringify(db.finance));
+            
+            // Reset
+            document.getElementById('sale-prod-select').value = '';
+            document.getElementById('sale-unit-price').value = '';
+            document.getElementById('sale-qty').value = 1;
+            document.getElementById('sale-desc-val').value = '';
+            document.getElementById('sale-desc-perc').value = '';
+            document.getElementById('sale-final-total').innerText = 'R$ 0,00';
+            
+            showToast("Venda e Financeiro atualizados!", false);
             renderSales();
-            ['sale-id','sale-prod','sale-client','sale-val','sale-date'].forEach(i => document.getElementById(i).value = '');
         }
 
         function deleteSale(id) {
-            db.sales = db.sales.filter(i => i.id !== id);
+            // Remove a venda
+            db.sales = db.sales.filter(s => s.id !== id);
+            // Remove a entrada financeira vinculada
+            db.finance = db.finance.filter(f => f.saleRef !== id);
+            
             localStorage.setItem('iadu_sales', JSON.stringify(db.sales));
+            localStorage.setItem('iadu_finance', JSON.stringify(db.finance));
             renderSales();
         }
 
-        function editSale(id) {
-            const item = db.sales.find(i => i.id === id);
-            document.getElementById('sale-id').value = item.id;
-            document.getElementById('sale-prod').value = item.prod;
-            document.getElementById('sale-client').value = item.client;
-            document.getElementById('sale-val').value = item.val;
-            document.getElementById('sale-date').value = item.date;
-        }
-
-        // --- LÓGICA ESTOQUE ---
+        // --- MÓDULO ESTOQUE ---
         function renderInventory() {
             const list = document.getElementById('inv-list');
             list.innerHTML = '';
             let totalQty = 0, totalVal = 0;
-
             db.inventory.forEach(item => {
                 totalQty += item.qty;
                 totalVal += (item.qty * item.unit);
                 list.innerHTML += `
                     <div class="list-item">
                         <div class="item-info">
-                            <h4>${item.name}</h4>
-                            <p>${item.qty} un x ${formatBRL(item.unit)}</p>
+                            <h4 style="${item.qty <= 0 ? 'color: #94a3b8; text-decoration: line-through;' : ''}">${item.name}</h4>
+                            <p>${item.qty <= 0 ? '<span style="color:red">SEM ESTOQUE</span>' : item.qty + ' un'} | Unit: ${formatBRL(item.unit)}</p>
                         </div>
                         <div class="flex items-center gap-4">
                             <span style="font-weight: 800; color: var(--warning)">${formatBRL(item.qty * item.unit)}</span>
-                            <div class="item-actions">
-                                <button class="action-btn edit-btn" onclick="editInventory('${item.id}')"><i data-lucide="edit-2"></i></button>
-                                <button class="action-btn delete-btn" onclick="deleteInventory('${item.id}')"><i data-lucide="trash-2"></i></button>
-                            </div>
+                            <button class="action-btn delete-btn" onclick="deleteInventory('${item.id}')"><i data-lucide="trash-2" size="16"></i></button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
-
             document.getElementById('inv-count').innerText = totalQty;
             document.getElementById('inv-total-value').innerText = formatBRL(totalVal);
             lucide.createIcons();
         }
 
         function saveInventory() {
-            const id = document.getElementById('inv-id').value;
             const name = document.getElementById('inv-name').value;
             const qty = parseInt(document.getElementById('inv-qty').value);
             const unit = parseFloat(document.getElementById('inv-unit').value);
-
-            if (!name || isNaN(qty) || isNaN(unit)) return;
-
-            if (id) {
-                const idx = db.inventory.findIndex(i => i.id === id);
-                db.inventory[idx] = { id, name, qty, unit };
-            } else {
-                db.inventory.unshift({ id: Date.now().toString(), name, qty, unit });
-            }
-
+            if (!name || isNaN(qty) || isNaN(unit)) return showToast("Campos inválidos.");
+            db.inventory.unshift({ id: Date.now().toString(), name, qty, unit });
             localStorage.setItem('iadu_inventory', JSON.stringify(db.inventory));
+            document.getElementById('inv-name').value = ''; document.getElementById('inv-qty').value = ''; document.getElementById('inv-unit').value = '';
             renderInventory();
-            ['inv-id','inv-name','inv-qty','inv-unit'].forEach(i => document.getElementById(i).value = '');
+            showToast("Produto cadastrado!", false);
         }
 
         function deleteInventory(id) {
@@ -695,21 +620,14 @@
             renderInventory();
         }
 
-        function editInventory(id) {
-            const item = db.inventory.find(i => i.id === id);
-            document.getElementById('inv-id').value = item.id;
-            document.getElementById('inv-name').value = item.name;
-            document.getElementById('inv-qty').value = item.qty;
-            document.getElementById('inv-unit').value = item.unit;
-        }
-
-        // --- RENDERIZADOR GERAL ---
+        // --- CONTROLADOR DE MÓDULOS ---
         function renderModule(mod) {
             if (mod === 'finance') renderFinance();
             if (mod === 'sales') renderSales();
             if (mod === 'inventory') renderInventory();
         }
 
+        window.onload = () => lucide.createIcons();
     </script>
 </body>
 </html>
