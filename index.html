@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IADU - Organização Total</title>
-    <!-- Lucide Icons -->
+    <title>IADU - Gestão Total</title>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -20,458 +20,276 @@
             --health: #f43f5e;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); }
         .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.2s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* HEADER E LAYOUT */
-        header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; position: sticky; top: 0; z-index: 50; }
-        .header-content { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        
+        header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; }
         main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
-        .back-btn { border: none; background: #f1f5f9; padding: 0.6rem 1.2rem; border-radius: 0.75rem; font-weight: 700; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
 
-        /* MENUS */
-        .menu-screen { min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
-        .menu-title { font-size: 1.8rem; font-weight: 800; color: #334155; margin-bottom: 2.5rem; }
-        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; width: 100%; max-width: 900px; }
-        
-        .card { background: var(--card); border: 1px solid var(--border); padding: 2.5rem 1.5rem; border-radius: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1); border-color: var(--primary); }
-        .card span { font-size: 1.1rem; font-weight: 700; color: #475569; }
+        /* Dashboard */
+        .menu-screen { text-align: center; padding: 2rem 0; }
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .card { background: white; border: 1px solid var(--border); padding: 2rem; border-radius: 1rem; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 
-        /* MÓDULOS */
-        .module-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
-        @media (max-width: 768px) { .module-layout { grid-template-columns: 1fr; } }
-        
-        .form-container { background: white; padding: 1.5rem; border-radius: 1.2rem; border: 1px solid var(--border); height: fit-content; }
-        .input-group { margin-bottom: 1.2rem; }
-        label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem; color: #64748b; }
-        input, select { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 0.75rem; font-size: 1rem; }
-        
-        .btn { width: 100%; padding: 1rem; border: none; border-radius: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-personal { background: var(--personal); color: white; }
-        .btn-routine { background: var(--routine); color: white; }
-        .btn-health { background: var(--health); color: white; }
-        
-        .list-container { background: white; border-radius: 1.2rem; border: 1px solid var(--border); overflow: hidden; }
-        .list-header { padding: 1.2rem; background: #f8fafc; border-bottom: 1px solid var(--border); font-weight: 800; }
-        .list-item { padding: 1.2rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        .item-data { display: flex; flex-direction: column; gap: 0.2rem; }
-        .item-title { font-weight: 700; }
-        .item-sub { font-size: 0.8rem; color: #94a3b8; }
-        
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-box { background: white; padding: 1.2rem; border-radius: 1rem; border: 1px solid var(--border); text-align: center; }
-        .stat-box b { font-size: 1.2rem; display: block; }
+        /* Módulos */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border); text-align: center; }
+        .stat-card b { display: block; font-size: 1.25rem; margin-top: 0.5rem; }
 
-        .icon-btn { border: none; background: #f8fafc; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; color: #64748b; }
-        .icon-btn.delete:hover { color: var(--danger); background: #fef2f2; }
+        .module-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
+        @media (max-width: 768px) { .module-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr; } }
 
-        #toast { position: fixed; bottom: 2rem; right: 2rem; background: #334155; color: white; padding: 1rem 2rem; border-radius: 1rem; z-index: 1000; font-weight: 700; }
+        .form-box { background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); height: fit-content; }
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem; color: #64748b; }
+        input, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; }
+
+        .btn { width: 100%; padding: 0.8rem; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-pdf { background: #334155; color: white; margin-top: 1rem; }
+        .btn-back { background: #f1f5f9; color: #64748b; width: auto; padding: 0.5rem 1rem; }
+
+        .data-list { background: white; border-radius: 1rem; border: 1px solid var(--border); overflow: hidden; }
+        .item { padding: 1rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .item:last-child { border: none; }
     </style>
 </head>
 <body>
 
-    <div id="toast" class="hidden"></div>
-
-    <!-- TELA INICIAL -->
-    <div id="screen-main" class="menu-screen fade-in">
-        <h1 style="font-size: 3.5rem; font-weight: 900; color: var(--primary); margin-bottom: 1rem;">IADU</h1>
-        <h2 class="menu-title">Organização Total</h2>
-        <div class="options-grid">
-            <div class="card" onclick="showScreen('category-business')"><i data-lucide="briefcase" size="40" style="color:var(--primary)"></i><span>Negócio</span></div>
-            <div class="card" onclick="showScreen('category-personal')"><i data-lucide="user" size="40" style="color:var(--personal)"></i><span>Pessoal</span></div>
-            <div class="card" onclick="showScreen('category-routine')"><i data-lucide="calendar" size="40" style="color:var(--routine)"></i><span>Rotina</span></div>
-            <div class="card" onclick="showScreen('category-health')"><i data-lucide="heart-pulse" size="40" style="color:var(--health)"></i><span>Saúde</span></div>
+    <header>
+        <div style="display:flex; align-items:center; gap:1rem">
+            <button id="btn-back-main" class="btn btn-back hidden" onclick="showScreen('main')"><i data-lucide="arrow-left"></i></button>
+            <h1 id="app-title" style="font-size: 1.5rem; color: var(--primary)">IADU</h1>
         </div>
-    </div>
+        <div id="header-actions"></div>
+    </header>
 
-    <!-- SUBMENUS -->
-    <div id="screen-category-business" class="menu-screen hidden fade-in">
-        <button class="back-btn" onclick="showScreen('main')"><i data-lucide="arrow-left"></i> Voltar</button>
-        <h2 class="menu-title" style="margin-top: 2rem;">Negócio</h2>
-        <div class="options-grid">
-            <div class="card" onclick="openModule('biz_finance')"><i data-lucide="landmark"></i><span>Finanças Biz</span></div>
-            <div class="card" onclick="openModule('biz_sales')"><i data-lucide="shopping-bag"></i><span>Vendas</span></div>
-            <div class="card" onclick="openModule('biz_stock')"><i data-lucide="box"></i><span>Estoque</span></div>
-        </div>
-    </div>
-
-    <div id="screen-category-personal" class="menu-screen hidden fade-in">
-        <button class="back-btn" onclick="showScreen('main')"><i data-lucide="arrow-left"></i> Voltar</button>
-        <h2 class="menu-title" style="margin-top: 2rem;">Pessoal</h2>
-        <div class="options-grid">
-            <div class="card" onclick="openModule('per_finance')"><i data-lucide="wallet"></i><span>Finanças Pessoais</span></div>
-        </div>
-    </div>
-
-    <div id="screen-category-routine" class="menu-screen hidden fade-in">
-        <button class="back-btn" onclick="showScreen('main')"><i data-lucide="arrow-left"></i> Voltar</button>
-        <h2 class="menu-title" style="margin-top: 2rem;">Rotina</h2>
-        <div class="options-grid">
-            <div class="card" onclick="openModule('rou_habits')"><i data-lucide="zap"></i><span>Hábitos</span></div>
-            <div class="card" onclick="openModule('rou_tasks')"><i data-lucide="check-square"></i><span>Tarefas</span></div>
-        </div>
-    </div>
-
-    <div id="screen-category-health" class="menu-screen hidden fade-in">
-        <button class="back-btn" onclick="showScreen('main')"><i data-lucide="arrow-left"></i> Voltar</button>
-        <h2 class="menu-title" style="margin-top: 2rem;">Saúde</h2>
-        <div class="options-grid">
-            <div class="card" onclick="openModule('hea_diet')"><i data-lucide="utensils"></i><span>Dieta</span></div>
-            <div class="card" onclick="openModule('hea_workout')"><i data-lucide="dumbbell"></i><span>Treino</span></div>
-        </div>
-    </div>
-
-    <!-- CONTAINER DE MÓDULOS -->
-    <div id="module-container" class="hidden">
-        <header>
-            <div class="header-content">
-                <h2 id="module-display-name" style="font-weight: 900;">Módulo</h2>
-                <button class="back-btn" id="module-back-btn"><i data-lucide="chevron-left"></i> Voltar</button>
+    <main>
+        <!-- Home -->
+        <div id="screen-main" class="menu-screen">
+            <h2>Bem-vindo ao seu Organizador</h2>
+            <div class="options-grid">
+                <div class="card" onclick="showScreen('biz')"><i data-lucide="briefcase" color="var(--primary)"></i><span>Negócio</span></div>
+                <div class="card" onclick="showScreen('per')"><i data-lucide="user" color="var(--personal)"></i><span>Pessoal</span></div>
+                <div class="card" onclick="showScreen('rou')"><i data-lucide="calendar" color="var(--routine)"></i><span>Rotina</span></div>
+                <div class="card" onclick="showScreen('hea')"><i data-lucide="heart" color="var(--health)"></i><span>Saúde</span></div>
             </div>
-        </header>
-        <main id="module-content" class="fade-in"></main>
-    </div>
+        </div>
+
+        <!-- Submenus -->
+        <div id="screen-biz" class="menu-screen hidden">
+            <div class="options-grid">
+                <div class="card" onclick="openModule('biz_finance')"><i data-lucide="landmark"></i><span>Finanças Biz</span></div>
+                <div class="card" onclick="openModule('biz_sales')"><i data-lucide="shopping-cart"></i><span>Vendas</span></div>
+                <div class="card" onclick="openModule('biz_stock')"><i data-lucide="package"></i><span>Estoque</span></div>
+            </div>
+        </div>
+
+        <div id="screen-per" class="menu-screen hidden">
+            <div class="options-grid">
+                <div class="card" onclick="openModule('per_finance')"><i data-lucide="wallet"></i><span>Finanças Pessoal</span></div>
+            </div>
+        </div>
+
+        <div id="screen-rou" class="menu-screen hidden">
+            <div class="options-grid">
+                <div class="card" onclick="openModule('rou_tasks')"><i data-lucide="list-checks"></i><span>Tarefas</span></div>
+                <div class="card" onclick="openModule('rou_habits')"><i data-lucide="zap"></i><span>Hábitos</span></div>
+            </div>
+        </div>
+
+        <div id="screen-hea" class="menu-screen hidden">
+            <div class="options-grid">
+                <div class="card" onclick="openModule('hea_diet')"><i data-lucide="utensils"></i><span>Dieta</span></div>
+                <div class="card" onclick="openModule('hea_workout')"><i data-lucide="dumbbell"></i><span>Treino</span></div>
+            </div>
+        </div>
+
+        <!-- Module Container -->
+        <div id="module-view" class="hidden">
+            <div id="module-stats" class="stats-grid"></div>
+            <div class="module-grid">
+                <div id="module-form" class="form-box"></div>
+                <div id="module-list" class="data-list"></div>
+            </div>
+            <button class="btn btn-pdf" onclick="generatePDF()"><i data-lucide="file-text"></i> Exportar PDF</button>
+        </div>
+    </main>
 
     <script>
         const DB = {
             get: (key) => JSON.parse(localStorage.getItem('iadu_' + key)) || [],
-            set: (key, data) => localStorage.setItem('iadu_' + key, JSON.stringify(data))
+            save: (key, data) => localStorage.setItem('iadu_' + key, JSON.stringify(data))
         };
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.menu-screen').forEach(s => s.classList.add('hidden'));
-            const moduleContainer = document.getElementById('module-container');
-            if(moduleContainer) moduleContainer.classList.add('hidden');
-            
-            const target = document.getElementById('screen-' + screenId);
-            if(target) target.classList.remove('hidden');
+        let currentModule = '';
+
+        function showScreen(id) {
+            document.querySelectorAll('.menu-screen, #module-view').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-' + id)?.classList.remove('hidden');
+            document.getElementById('btn-back-main').classList.toggle('hidden', id === 'main');
+            document.getElementById('app-title').innerText = id === 'main' ? 'IADU' : id.toUpperCase();
             lucide.createIcons();
         }
 
-        function notify(msg) {
-            const t = document.getElementById('toast');
-            if(!t) return;
-            t.innerText = msg; t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('hidden'), 3000);
-        }
-
-        function openModule(modId) {
-            const content = document.getElementById('module-content');
-            const nameDisplay = document.getElementById('module-display-name');
+        function openModule(mod) {
+            currentModule = mod;
             document.querySelectorAll('.menu-screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('module-container').classList.remove('hidden');
-            
-            document.getElementById('module-back-btn').onclick = () => {
-                if(modId.startsWith('biz_')) showScreen('category-business');
-                else if(modId.startsWith('per_')) showScreen('category-personal');
-                else if(modId.startsWith('rou_')) showScreen('category-routine');
-                else if(modId.startsWith('hea_')) showScreen('category-health');
-                else showScreen('main');
-            };
-
-            if(modId === 'biz_sales') { nameDisplay.innerText = "Vendas"; renderSales(content); }
-            else if(modId === 'biz_stock') { nameDisplay.innerText = "Estoque"; renderStock(content); }
-            else if(modId === 'per_finance') { nameDisplay.innerText = "Finanças Pessoais"; renderPerFinance(content); }
-            else if(modId === 'biz_finance') { nameDisplay.innerText = "Finanças Biz"; renderBizFinance(content); }
-            else if(modId === 'rou_habits') { nameDisplay.innerText = "Hábitos"; renderHabits(content); }
-            else if(modId === 'rou_tasks') { nameDisplay.innerText = "Tarefas"; renderTasks(content); }
-            else if(modId === 'hea_diet') { nameDisplay.innerText = "Dieta"; renderDiet(content); }
-            else if(modId === 'hea_workout') { nameDisplay.innerText = "Treino"; renderWorkout(content); }
-            
-            lucide.createIcons();
+            document.getElementById('module-view').classList.remove('hidden');
+            renderModule();
         }
 
-        // --- NEGÓCIO: VENDAS ---
-        function renderSales(el) {
-            const stock = DB.get('biz_stock');
-            const sales = DB.get('biz_sales');
-            el.innerHTML = `
-                <div class="module-layout">
-                    <div class="form-container">
-                        <div class="input-group"><label>Produto</label>
-                            <select id="v-prod" onchange="updateSaleUI()">
-                                <option value="">Selecione...</option>
-                                ${stock.map((s, i) => `<option value="${i}">${s.name} (Estoque: ${s.qty})</option>`).join('')}
-                            </select>
+        function renderModule() {
+            const form = document.getElementById('module-form');
+            const list = document.getElementById('module-list');
+            const stats = document.getElementById('module-stats');
+            const data = DB.get(currentModule);
+
+            stats.innerHTML = '';
+            
+            if (currentModule === 'biz_finance') {
+                const ins = data.filter(i => i.type === 'in').reduce((a, b) => a + Number(b.val), 0);
+                const outs = data.filter(i => i.type === 'out').reduce((a, b) => a + Number(b.val), 0);
+                stats.innerHTML = `
+                    <div class="stat-card">Entradas <b style="color:var(--success)">R$ ${ins.toFixed(2)}</b></div>
+                    <div class="stat-card">Saídas <b style="color:var(--danger)">R$ ${outs.toFixed(2)}</b></div>
+                    <div class="stat-card">Saldo <b>R$ ${(ins - outs).toFixed(2)}</b></div>
+                `;
+                form.innerHTML = `
+                    <div class="input-group"><label>Descrição</label><input type="text" id="f-desc"></div>
+                    <div class="input-group"><label>Valor</label><input type="number" id="f-val"></div>
+                    <div class="input-group"><label>Tipo</label><select id="f-type"><option value="in">Entrada</option><option value="out">Saída</option></select></div>
+                    <button class="btn btn-blue" onclick="addData()">Salvar</button>
+                `;
+            } else if (currentModule === 'biz_sales') {
+                const stock = DB.get('biz_stock');
+                form.innerHTML = `
+                    <div class="input-group"><label>Produto</label>
+                    <select id="s-prod">${stock.map((p, i) => `<option value="${i}">${p.name} (R$ ${p.price})</option>`)}</select></div>
+                    <div class="input-group"><label>Quantidade</label><input type="number" id="s-qty" value="1"></div>
+                    <button class="btn btn-blue" onclick="addSale()">Vender</button>
+                `;
+            } else if (currentModule === 'biz_stock') {
+                form.innerHTML = `
+                    <div class="input-group"><label>Produto</label><input type="text" id="st-name"></div>
+                    <div class="input-group"><label>Preço Unitário</label><input type="number" id="st-price"></div>
+                    <div class="input-group"><label>Qtd Inicial</label><input type="number" id="st-qty"></div>
+                    <button class="btn btn-blue" onclick="addData()">Adicionar</button>
+                `;
+            } else if (currentModule === 'rou_tasks') {
+                form.innerHTML = `
+                    <div class="input-group"><label>Tarefa</label><input type="text" id="t-name"></div>
+                    <div class="input-group"><label>Prioridade</label><select id="t-pri"><option>Baixa</option><option>Alta</option></select></div>
+                    <button class="btn btn-blue" onclick="addData()">Adicionar</button>
+                `;
+            } else if (currentModule === 'hea_workout') {
+                form.innerHTML = `
+                    <div class="input-group"><label>Exercício</label><input type="text" id="w-name"></div>
+                    <div class="input-group"><label>Séries x Reps</label><input type="text" id="w-reps"></div>
+                    <button class="btn btn-blue" onclick="addData()">Salvar Treino</button>
+                `;
+            } else {
+                // Fallback para outros módulos similares
+                form.innerHTML = `
+                    <div class="input-group"><label>Nome/Descrição</label><input type="text" id="gen-name"></div>
+                    <div class="input-group"><label>Valor/Info</label><input type="text" id="gen-info"></div>
+                    <button class="btn btn-blue" onclick="addData()">Salvar</button>
+                `;
+            }
+
+            list.innerHTML = data.length ? '' : '<p style="padding:2rem; color:#94a3b8; text-align:center">Nenhum registro.</p>';
+            data.slice().reverse().forEach((item, idx) => {
+                list.innerHTML += `
+                    <div class="item">
+                        <div>
+                            <strong>${item.name || item.desc || 'Registro'}</strong>
+                            <div style="font-size:0.8rem; color:#64748b">${item.val ? 'R$ '+item.val : (item.info || item.qty || '')}</div>
                         </div>
-                        <div class="input-group"><label>Quantidade</label><input type="number" id="v-qty" value="1" min="1" oninput="updateSaleUI()"></div>
-                        <div class="input-group"><label>Valor Unitário (R$)</label><input type="number" id="v-price" readonly style="background:#f1f5f9"></div>
-                        <div class="input-group"><label>Desconto Total (R$)</label><input type="number" id="v-desc" value="0" oninput="updateSaleUI()"></div>
-                        <div class="input-group"><label>Nome do Cliente</label><input type="text" id="v-cust"></div>
-                        <div class="input-group"><label>Total Final</label><b id="v-total-display" style="font-size:1.5rem; color:var(--success)">R$ 0,00</b></div>
-                        <button class="btn btn-primary" onclick="processSale()">Finalizar Venda</button>
+                        <button onclick="deleteData(${data.length - 1 - idx})" style="border:none; background:none; cursor:pointer; color:var(--danger)"><i data-lucide="trash-2" size="18"></i></button>
                     </div>
-                    <div class="list-container">
-                        <div class="list-header">Histórico de Vendas</div>
-                        <div id="sales-list"></div>
-                    </div>
-                </div>`;
-            
-            const list = el.querySelector('#sales-list');
-            if(!sales.length) list.innerHTML = '<div style="padding:2rem;text-align:center;color:#94a3b8">Sem vendas.</div>';
-            sales.slice().reverse().forEach((s, idx) => {
-                const origIdx = sales.length - 1 - idx;
-                list.innerHTML += `<div class="list-item">
-                    <div class="item-data"><span class="item-title">${s.prodName} x${s.qty}</span><span class="item-sub">${s.customer || 'Geral'} | ${s.date}</span></div>
-                    <div style="display:flex;align-items:center;gap:0.5rem"><b>R$ ${s.totalFinal.toFixed(2)}</b>
-                    <button class="icon-btn delete" onclick="deleteItem('biz_sales', ${origIdx}, () => openModule('biz_sales'))"><i data-lucide="trash-2" size="14"></i></button></div>
-                </div>`;
+                `;
             });
+            lucide.createIcons();
         }
 
-        window.updateSaleUI = () => {
+        function addData() {
+            const data = DB.get(currentModule);
+            let newItem = { id: Date.now(), date: new Date().toLocaleDateString() };
+
+            if (currentModule === 'biz_finance') {
+                newItem.desc = document.getElementById('f-desc').value;
+                newItem.val = document.getElementById('f-val').value;
+                newItem.type = document.getElementById('f-type').value;
+            } else if (currentModule === 'biz_stock') {
+                newItem.name = document.getElementById('st-name').value;
+                newItem.price = document.getElementById('st-price').value;
+                newItem.qty = document.getElementById('st-qty').value;
+            } else if (currentModule === 'rou_tasks') {
+                newItem.name = document.getElementById('t-name').value;
+                newItem.info = document.getElementById('t-pri').value;
+            } else if (currentModule === 'hea_workout') {
+                newItem.name = document.getElementById('w-name').value;
+                newItem.info = document.getElementById('w-reps').value;
+            } else {
+                newItem.name = document.getElementById('gen-name').value;
+                newItem.info = document.getElementById('gen-info').value;
+            }
+
+            data.push(newItem);
+            DB.save(currentModule, data);
+            renderModule();
+        }
+
+        function addSale() {
             const stock = DB.get('biz_stock');
-            const idx = document.getElementById('v-prod').value;
-            if(idx === "") return;
-            const qty = parseInt(document.getElementById('v-qty').value) || 0;
-            const desc = parseFloat(document.getElementById('v-desc').value) || 0;
-            const item = stock[idx];
-            document.getElementById('v-price').value = item.val;
-            const total = (item.val * qty) - desc;
-            document.getElementById('v-total-display').innerText = `R$ ${Math.max(0, total).toFixed(2)}`;
-        };
-
-        window.processSale = () => {
-            const stock = DB.get('biz_stock');
-            const idx = document.getElementById('v-prod').value;
-            const qty = parseInt(document.getElementById('v-qty').value) || 0;
-            const desc = parseFloat(document.getElementById('v-desc').value) || 0;
-            if(idx === "" || qty <= 0) return notify("Dados inválidos");
-            if(stock[idx].qty < qty) return notify("Estoque insuficiente");
-
-            const item = stock[idx];
-            const total = Math.max(0, (item.val * qty) - desc);
-            stock[idx].qty -= qty;
-            DB.set('biz_stock', stock);
-
             const sales = DB.get('biz_sales');
-            sales.push({ prodName: item.name, qty, totalFinal: total, customer: document.getElementById('v-cust').value, date: new Date().toLocaleString() });
-            DB.set('biz_sales', sales);
-
             const bizFin = DB.get('biz_finance');
-            bizFin.push({ type: 'in', val: total, desc: `Venda: ${item.name}`, date: new Date().toLocaleDateString() });
-            DB.set('biz_finance', bizFin);
+            const idx = document.getElementById('s-prod').value;
+            const qty = Number(document.getElementById('s-qty').value);
 
-            notify("Venda Concluída!");
-            openModule('biz_sales');
-        };
-
-        // --- PESSOAL: FINANÇAS ---
-        function renderPerFinance(el) {
-            const data = DB.get('financeiro_pessoal');
-            const ins = data.filter(d => d.type === 'in').reduce((a, b) => a + b.val, 0);
-            const outs = data.filter(d => d.type === 'out').reduce((a, b) => a + b.val, 0);
-            el.innerHTML = `
-                <div class="stats-row">
-                    <div class="stat-box"><small>Entradas</small><b style="color:var(--success)">R$ ${ins.toFixed(2)}</b></div>
-                    <div class="stat-box"><small>Saídas</small><b style="color:var(--danger)">R$ ${outs.toFixed(2)}</b></div>
-                    <div class="stat-box"><small>Saldo</small><b>R$ ${(ins - outs).toFixed(2)}</b></div>
-                </div>
-                <div class="module-layout">
-                    <div class="form-container">
-                        <div class="input-group"><label>Tipo</label><select id="p-type"><option value="in">Entrada</option><option value="out">Saída</option></select></div>
-                        <div class="input-group"><label>Valor</label><input type="number" id="p-val"></div>
-                        <div class="input-group"><label>Descrição</label><input type="text" id="p-desc"></div>
-                        <button class="btn btn-personal" onclick="addPerFin()">Lançar</button>
-                    </div>
-                    <div class="list-container" id="p-list"></div>
-                </div>`;
-            const list = el.querySelector('#p-list');
-            data.slice().reverse().forEach((f, i) => {
-                list.innerHTML += `<div class="list-item">
-                    <div class="item-data"><span>${f.desc}</span><small>${f.date}</small></div>
-                    <div style="display:flex;align-items:center;gap:0.5rem"><b style="color:${f.type === 'in' ? 'var(--success)' : 'var(--danger)'}">R$ ${f.val.toFixed(2)}</b>
-                    <button class="icon-btn delete" onclick="deleteItem('financeiro_pessoal', ${data.length-1-i}, () => openModule('per_finance'))"><i data-lucide="trash-2" size="14"></i></button></div>
-                </div>`;
-            });
+            if (stock[idx] && stock[idx].qty >= qty) {
+                const total = stock[idx].price * qty;
+                stock[idx].qty -= qty;
+                sales.push({ name: `Venda: ${stock[idx].name}`, qty, val: total });
+                bizFin.push({ desc: `Venda: ${stock[idx].name}`, val: total, type: 'in' });
+                
+                DB.save('biz_stock', stock);
+                DB.save('biz_sales', sales);
+                DB.save('biz_finance', bizFin);
+                renderModule();
+            } else {
+                alert('Estoque insuficiente!');
+            }
         }
 
-        window.addPerFin = () => {
-            const val = parseFloat(document.getElementById('p-val').value);
-            const desc = document.getElementById('p-desc').value;
-            const type = document.getElementById('p-type').value;
-            if(!val || !desc) return;
-            const data = DB.get('financeiro_pessoal');
-            data.push({ val, desc, type, date: new Date().toLocaleDateString() });
-            DB.set('financeiro_pessoal', data);
-            openModule('per_finance');
-        };
-
-        // --- ROTINA: HÁBITOS ---
-        function renderHabits(el) {
-            const data = DB.get('rou_habits');
-            el.innerHTML = `
-                <div class="module-layout">
-                    <div class="form-container">
-                        <div class="input-group"><label>Novo Hábito</label><input type="text" id="h-name" placeholder="Ex: Beber água"></div>
-                        <button class="btn btn-routine" onclick="addHabit()">Adicionar</button>
-                    </div>
-                    <div class="list-container" id="h-list"></div>
-                </div>`;
-            const list = el.querySelector('#h-list');
-            data.forEach((h, i) => {
-                list.innerHTML += `<div class="list-item">
-                    <span>${h}</span>
-                    <button class="icon-btn delete" onclick="deleteItem('rou_habits', ${i}, () => openModule('rou_habits'))"><i data-lucide="trash-2" size="14"></i></button>
-                </div>`;
-            });
-        }
-
-        window.addHabit = () => {
-            const name = document.getElementById('h-name').value;
-            if(!name) return;
-            const data = DB.get('rou_habits');
-            data.push(name);
-            DB.set('rou_habits', data);
-            openModule('rou_habits');
-        };
-
-        // --- ROTINA: TAREFAS ---
-        function renderTasks(el) {
-            const data = DB.get('rou_tasks');
-            el.innerHTML = `
-                <div class="module-layout">
-                    <div class="form-container">
-                        <div class="input-group"><label>Tarefa</label><input type="text" id="t-name" placeholder="Ex: Pagar conta de luz"></div>
-                        <div class="input-group"><label>Prioridade</label><select id="t-pri"><option value="Normal">Normal</option><option value="Alta">Alta</option></select></div>
-                        <button class="btn btn-routine" onclick="addTask()">Salvar Tarefa</button>
-                    </div>
-                    <div class="list-container" id="t-list"></div>
-                </div>`;
-            const list = el.querySelector('#t-list');
-            data.forEach((t, i) => {
-                list.innerHTML += `<div class="list-item">
-                    <div class="item-data"><span>${t.name}</span><small>${t.pri}</small></div>
-                    <button class="icon-btn delete" onclick="deleteItem('rou_tasks', ${i}, () => openModule('rou_tasks'))"><i data-lucide="trash-2" size="14"></i></button>
-                </div>`;
-            });
-        }
-
-        window.addTask = () => {
-            const name = document.getElementById('t-name').value;
-            const pri = document.getElementById('t-pri').value;
-            if(!name) return;
-            const data = DB.get('rou_tasks');
-            data.push({ name, pri });
-            DB.set('rou_tasks', data);
-            openModule('rou_tasks');
-        };
-
-        // --- SAÚDE: DIETA ---
-        function renderDiet(el) {
-            const data = DB.get('hea_diet');
-            el.innerHTML = `
-                <div class="module-layout">
-                    <div class="form-container">
-                        <div class="input-group"><label>Refeição</label><input type="text" id="d-name" placeholder="Ex: Almoço"></div>
-                        <div class="input-group"><label>Calorias (opcional)</label><input type="number" id="d-cal"></div>
-                        <button class="btn btn-health" onclick="addDiet()">Registrar</button>
-                    </div>
-                    <div class="list-container" id="d-list"></div>
-                </div>`;
-            const list = el.querySelector('#d-list');
-            data.forEach((d, i) => {
-                list.innerHTML += `<div class="list-item">
-                    <div class="item-data"><span>${d.name}</span><small>${d.cal || 0} kcal</small></div>
-                    <button class="icon-btn delete" onclick="deleteItem('hea_diet', ${i}, () => openModule('hea_diet'))"><i data-lucide="trash-2" size="14"></i></button>
-                </div>`;
-            });
-        }
-
-        window.addDiet = () => {
-            const name = document.getElementById('d-name').value;
-            const cal = document.getElementById('d-cal').value;
-            if(!name) return;
-            const data = DB.get('hea_diet');
-            data.push({ name, cal });
-            DB.set('hea_diet', data);
-            openModule('hea_diet');
-        }
-
-        // --- SAÚDE: TREINO ---
-        function renderWorkout(el) {
-            const data = DB.get('hea_workout');
-            el.innerHTML = `
-                <div class="module-layout">
-                    <div class="form-container">
-                        <div class="input-group"><label>Exercício</label><input type="text" id="w-name" placeholder="Ex: Agachamento"></div>
-                        <div class="input-group"><label>Séries/Reps</label><input type="text" id="w-rep" placeholder="Ex: 3x12"></div>
-                        <button class="btn btn-health" onclick="addWorkout()">Salvar Treino</button>
-                    </div>
-                    <div class="list-container" id="w-list"></div>
-                </div>`;
-            const list = el.querySelector('#w-list');
-            data.forEach((w, i) => {
-                list.innerHTML += `<div class="list-item">
-                    <div class="item-data"><span>${w.name}</span><small>${w.rep}</small></div>
-                    <button class="icon-btn delete" onclick="deleteItem('hea_workout', ${i}, () => openModule('hea_workout'))"><i data-lucide="trash-2" size="14"></i></button>
-                </div>`;
-            });
-        }
-
-        window.addWorkout = () => {
-            const name = document.getElementById('w-name').value;
-            const rep = document.getElementById('w-rep').value;
-            if(!name) return;
-            const data = DB.get('hea_workout');
-            data.push({ name, rep });
-            DB.set('hea_workout', data);
-            openModule('hea_workout');
-        };
-
-        // --- ESTOQUE & BIZ FIN ---
-        function renderStock(el) {
-            const stock = DB.get('biz_stock');
-            el.innerHTML = `
-                <div class="module-layout">
-                    <div class="form-container">
-                        <div class="input-group"><label>Produto</label><input type="text" id="st-name"></div>
-                        <div class="input-group"><label>Qtd</label><input type="number" id="st-qty"></div>
-                        <div class="input-group"><label>Preço</label><input type="number" id="st-val"></div>
-                        <button class="btn btn-primary" onclick="addStock()">Salvar</button>
-                    </div>
-                    <div class="list-container" id="st-list"></div>
-                </div>`;
-            const list = el.querySelector('#st-list');
-            stock.forEach((s, i) => {
-                list.innerHTML += `<div class="list-item">
-                    <div class="item-data"><span>${s.name}</span><small>Qtd: ${s.qty} | R$ ${s.val}</small></div>
-                    <button class="icon-btn delete" onclick="deleteItem('biz_stock', ${i}, () => openModule('biz_stock'))"><i data-lucide="trash-2" size="14"></i></button>
-                </div>`;
-            });
-        }
-
-        window.addStock = () => {
-            const name = document.getElementById('st-name').value;
-            const qty = parseInt(document.getElementById('st-qty').value);
-            const val = parseFloat(document.getElementById('st-val').value);
-            if(!name) return;
-            const data = DB.get('biz_stock');
-            data.push({ name, qty, val });
-            DB.set('biz_stock', data);
-            openModule('biz_stock');
-        };
-
-        function renderBizFinance(el) {
-            const data = DB.get('biz_finance');
-            el.innerHTML = `<div class="list-container"><div class="list-header">Fluxo Negócio</div><div id="bz-list"></div></div>`;
-            const list = el.querySelector('#bz-list');
-            data.slice().reverse().forEach(f => {
-                list.innerHTML += `<div class="list-item"><span>${f.desc}</span><b>R$ ${f.val.toFixed(2)}</b></div>`;
-            });
-        }
-
-        window.deleteItem = (key, idx, callback) => {
-            const data = DB.get(key);
+        function deleteData(idx) {
+            const data = DB.get(currentModule);
             data.splice(idx, 1);
-            DB.set(key, data);
-            callback();
-        };
+            DB.save(currentModule, data);
+            renderModule();
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const data = DB.get(currentModule);
+            
+            doc.setFontSize(20);
+            doc.text(`Relatorio IADU: ${currentModule.toUpperCase()}`, 10, 20);
+            
+            doc.setFontSize(12);
+            let y = 40;
+            data.forEach((item, i) => {
+                const line = `${i+1}. ${item.name || item.desc} - ${item.val || item.info || item.qty || ''}`;
+                doc.text(line, 10, y);
+                y += 10;
+                if(y > 280) { doc.addPage(); y = 20; }
+            });
+            
+            doc.save(`relatorio_${currentModule}.pdf`);
+        }
 
         window.onload = () => lucide.createIcons();
     </script>
