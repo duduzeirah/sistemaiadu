@@ -149,7 +149,7 @@
 
             stats.innerHTML = '';
             
-            if (currentModule === 'biz_finance') {
+            if (currentModule === 'biz_finance' || currentModule === 'per_finance') {
                 const ins = data.filter(i => i.type === 'in').reduce((a, b) => a + Number(b.val), 0);
                 const outs = data.filter(i => i.type === 'out').reduce((a, b) => a + Number(b.val), 0);
                 stats.innerHTML = `
@@ -191,7 +191,6 @@
                     <button class="btn btn-blue" onclick="addData()">Salvar Treino</button>
                 `;
             } else {
-                // Fallback para outros módulos similares
                 form.innerHTML = `
                     <div class="input-group"><label>Nome/Descrição</label><input type="text" id="gen-name"></div>
                     <div class="input-group"><label>Valor/Info</label><input type="text" id="gen-info"></div>
@@ -201,11 +200,14 @@
 
             list.innerHTML = data.length ? '' : '<p style="padding:2rem; color:#94a3b8; text-align:center">Nenhum registro.</p>';
             data.slice().reverse().forEach((item, idx) => {
+                const isFinance = (currentModule === 'biz_finance' || currentModule === 'per_finance');
+                const colorClass = isFinance ? (item.type === 'in' ? 'color:var(--success)' : 'color:var(--danger)') : 'color:#64748b';
+                
                 list.innerHTML += `
                     <div class="item">
                         <div>
                             <strong>${item.name || item.desc || 'Registro'}</strong>
-                            <div style="font-size:0.8rem; color:#64748b">${item.val ? 'R$ '+item.val : (item.info || item.qty || '')}</div>
+                            <div style="font-size:0.8rem; ${colorClass}">${item.val ? 'R$ '+item.val : (item.info || item.qty || '')}</div>
                         </div>
                         <button onclick="deleteData(${data.length - 1 - idx})" style="border:none; background:none; cursor:pointer; color:var(--danger)"><i data-lucide="trash-2" size="18"></i></button>
                     </div>
@@ -218,7 +220,7 @@
             const data = DB.get(currentModule);
             let newItem = { id: Date.now(), date: new Date().toLocaleDateString() };
 
-            if (currentModule === 'biz_finance') {
+            if (currentModule === 'biz_finance' || currentModule === 'per_finance') {
                 newItem.desc = document.getElementById('f-desc').value;
                 newItem.val = document.getElementById('f-val').value;
                 newItem.type = document.getElementById('f-type').value;
@@ -237,9 +239,13 @@
                 newItem.info = document.getElementById('gen-info').value;
             }
 
-            data.push(newItem);
-            DB.save(currentModule, data);
-            renderModule();
+            if ((newItem.name || newItem.desc) && (newItem.val || newItem.info || newItem.qty)) {
+                data.push(newItem);
+                DB.save(currentModule, data);
+                renderModule();
+            } else {
+                alert('Preencha os campos obrigatórios!');
+            }
         }
 
         function addSale() {
