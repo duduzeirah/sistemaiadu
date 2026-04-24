@@ -2,10 +2,11 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>IADU - Gestão Total</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -21,35 +22,45 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); }
+        body { background-color: var(--bg); color: var(--text); -webkit-text-size-adjust: 100%; }
         .hidden { display: none !important; }
         
-        header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; }
+        header { background: white; border-bottom: 1px solid var(--border); padding: 1rem 2rem; position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; min-height: 70px; }
         main { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
 
-        /* Dashboard */
+        /* Painel Principal */
         .menu-screen { text-align: center; padding: 2rem 0; }
         .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
         .card { background: white; border: 1px solid var(--border); padding: 2rem; border-radius: 1rem; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 
-        /* Módulos */
+        /* Estatísticas */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border); text-align: center; }
         .stat-card b { display: block; font-size: 1.25rem; margin-top: 0.5rem; }
 
         .module-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
-        @media (max-width: 768px) { .module-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { 
+            .module-grid { grid-template-columns: 1fr; } 
+            .stats-grid { grid-template-columns: 1fr; } 
+        }
 
         .form-box { background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); height: fit-content; }
         .input-group { margin-bottom: 1rem; }
         label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.3rem; color: #64748b; }
-        input, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; }
+        
+        input, select, textarea { 
+            width: 100%; 
+            padding: 0.75rem; 
+            border: 1px solid var(--border); 
+            border-radius: 0.5rem; 
+            font-size: 16px !important; 
+        }
 
         .btn { width: 100%; padding: 0.8rem; border: none; border-radius: 0.5rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
         .btn-blue { background: var(--primary); color: white; }
         .btn-pdf { background: #334155; color: white; margin-top: 1rem; }
-        .btn-back { background: #f1f5f9; color: #64748b; width: auto; padding: 0.5rem 1rem; }
+        .btn-back { background: #f1f5f9; color: #64748b; width: auto; padding: 0.6rem 1rem; border-radius: 0.5rem; }
 
         .data-list { background: white; border-radius: 1rem; border: 1px solid var(--border); overflow: hidden; }
         .item { padding: 1rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
@@ -60,61 +71,61 @@
 
     <header>
         <div style="display:flex; align-items:center; gap:1rem">
-            <button id="btn-back-main" class="btn btn-back hidden" onclick="showScreen('main')"><i data-lucide="arrow-left"></i></button>
+            <button id="btn-back-nav" class="btn btn-back hidden" onclick="navigateBack()"><i data-lucide="arrow-left"></i></button>
             <h1 id="app-title" style="font-size: 1.5rem; color: var(--primary)">IADU</h1>
         </div>
         <div id="header-actions"></div>
     </header>
 
     <main>
-        <!-- Home -->
+        <!-- Tela Inicial -->
         <div id="screen-main" class="menu-screen">
             <h2>Bem-vindo ao seu Organizador</h2>
             <div class="options-grid">
-                <div class="card" onclick="showScreen('biz')"><i data-lucide="briefcase" color="var(--primary)"></i><span>Negócio</span></div>
-                <div class="card" onclick="showScreen('per')"><i data-lucide="user" color="var(--personal)"></i><span>Pessoal</span></div>
-                <div class="card" onclick="showScreen('rou')"><i data-lucide="calendar" color="var(--routine)"></i><span>Rotina</span></div>
-                <div class="card" onclick="showScreen('hea')"><i data-lucide="heart" color="var(--health)"></i><span>Saúde</span></div>
+                <div class="card" onclick="goTo('negocio')"><i data-lucide="briefcase" color="var(--primary)"></i><span>Negócio</span></div>
+                <div class="card" onclick="goTo('pessoal')"><i data-lucide="user" color="var(--personal)"></i><span>Pessoal</span></div>
+                <div class="card" onclick="goTo('rotina')"><i data-lucide="calendar" color="var(--routine)"></i><span>Rotina</span></div>
+                <div class="card" onclick="goTo('saude')"><i data-lucide="heart" color="var(--health)"></i><span>Saúde</span></div>
             </div>
         </div>
 
-        <!-- Submenus -->
-        <div id="screen-biz" class="menu-screen hidden">
+        <!-- Submenus de Categorias -->
+        <div id="screen-negocio" class="menu-screen hidden">
             <div class="options-grid">
-                <div class="card" onclick="openModule('biz_finance')"><i data-lucide="landmark"></i><span>Finanças Biz</span></div>
-                <div class="card" onclick="openModule('biz_sales')"><i data-lucide="shopping-cart"></i><span>Vendas</span></div>
-                <div class="card" onclick="openModule('biz_stock')"><i data-lucide="package"></i><span>Estoque</span></div>
+                <div class="card" onclick="goToModule('biz_finance')"><i data-lucide="landmark"></i><span>Financeiro Negócio</span></div>
+                <div class="card" onclick="goToModule('biz_sales')"><i data-lucide="shopping-cart"></i><span>Vendas</span></div>
+                <div class="card" onclick="goToModule('biz_stock')"><i data-lucide="package"></i><span>Estoque</span></div>
             </div>
         </div>
 
-        <div id="screen-per" class="menu-screen hidden">
+        <div id="screen-pessoal" class="menu-screen hidden">
             <div class="options-grid">
-                <div class="card" onclick="openModule('per_finance')"><i data-lucide="wallet"></i><span>Finanças Pessoal</span></div>
+                <div class="card" onclick="goToModule('per_finance')"><i data-lucide="wallet"></i><span>Finanças Pessoais</span></div>
             </div>
         </div>
 
-        <div id="screen-rou" class="menu-screen hidden">
+        <div id="screen-rotina" class="menu-screen hidden">
             <div class="options-grid">
-                <div class="card" onclick="openModule('rou_tasks')"><i data-lucide="list-checks"></i><span>Tarefas</span></div>
-                <div class="card" onclick="openModule('rou_habits')"><i data-lucide="zap"></i><span>Hábitos</span></div>
+                <div class="card" onclick="goToModule('rou_tasks')"><i data-lucide="list-checks"></i><span>Tarefas</span></div>
+                <div class="card" onclick="goToModule('rou_habits')"><i data-lucide="zap"></i><span>Hábitos</span></div>
             </div>
         </div>
 
-        <div id="screen-hea" class="menu-screen hidden">
+        <div id="screen-saude" class="menu-screen hidden">
             <div class="options-grid">
-                <div class="card" onclick="openModule('hea_diet')"><i data-lucide="utensils"></i><span>Dieta</span></div>
-                <div class="card" onclick="openModule('hea_workout')"><i data-lucide="dumbbell"></i><span>Treino</span></div>
+                <div class="card" onclick="goToModule('hea_diet')"><i data-lucide="utensils"></i><span>Dieta</span></div>
+                <div class="card" onclick="goToModule('hea_workout')"><i data-lucide="dumbbell"></i><span>Treino</span></div>
             </div>
         </div>
 
-        <!-- Module Container -->
+        <!-- Visualização do Módulo -->
         <div id="module-view" class="hidden">
             <div id="module-stats" class="stats-grid"></div>
             <div class="module-grid">
                 <div id="module-form" class="form-box"></div>
                 <div id="module-list" class="data-list"></div>
             </div>
-            <button class="btn btn-pdf" onclick="generatePDF()"><i data-lucide="file-text"></i> Exportar PDF</button>
+            <button class="btn btn-pdf" onclick="generatePDF()"><i data-lucide="file-text"></i> Exportar PDF Profissional</button>
         </div>
     </main>
 
@@ -124,21 +135,71 @@
             save: (key, data) => localStorage.setItem('iadu_' + key, JSON.stringify(data))
         };
 
+        // Controle de Navegação (Pilha de Histórico)
+        let navHistory = ['main'];
         let currentModule = '';
 
-        function showScreen(id) {
+        function updateNavigationUI() {
+            const currentView = navHistory[navHistory.length - 1];
+            const isHome = currentView === 'main';
+            
             document.querySelectorAll('.menu-screen, #module-view').forEach(s => s.classList.add('hidden'));
-            document.getElementById('screen-' + id)?.classList.remove('hidden');
-            document.getElementById('btn-back-main').classList.toggle('hidden', id === 'main');
-            document.getElementById('app-title').innerText = id === 'main' ? 'IADU' : id.toUpperCase();
+            document.getElementById('btn-back-nav').classList.toggle('hidden', isHome);
+
+            const titleMap = {
+                'main': 'IADU',
+                'negocio': 'NEGÓCIO',
+                'pessoal': 'PESSOAL',
+                'rotina': 'ROTINA',
+                'saude': 'SAÚDE',
+                'module': currentModule ? getFriendlyModuleName(currentModule) : 'MÓDULO'
+            };
+
+            if (currentModule && navHistory.includes('module')) {
+                document.getElementById('module-view').classList.remove('hidden');
+                document.getElementById('app-title').innerText = titleMap['module'];
+                renderModule();
+            } else {
+                document.getElementById('screen-' + currentView)?.classList.remove('hidden');
+                document.getElementById('app-title').innerText = titleMap[currentView] || 'IADU';
+            }
             lucide.createIcons();
         }
 
-        function openModule(mod) {
-            currentModule = mod;
-            document.querySelectorAll('.menu-screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById('module-view').classList.remove('hidden');
-            renderModule();
+        function getFriendlyModuleName(modId) {
+            const names = {
+                'biz_finance': 'FINANCEIRO NEGÓCIO',
+                'biz_sales': 'VENDAS',
+                'biz_stock': 'ESTOQUE',
+                'per_finance': 'FINANÇAS PESSOAIS',
+                'rou_tasks': 'TAREFAS',
+                'rou_habits': 'HÁBITOS',
+                'hea_diet': 'DIETA',
+                'hea_workout': 'TREINO'
+            };
+            return names[modId] || 'MÓDULO';
+        }
+
+        function goTo(screenId) {
+            navHistory.push(screenId);
+            currentModule = '';
+            updateNavigationUI();
+        }
+
+        function goToModule(modId) {
+            currentModule = modId;
+            navHistory.push('module');
+            updateNavigationUI();
+        }
+
+        function navigateBack() {
+            if (navHistory.length > 1) {
+                navHistory.pop();
+                if (navHistory[navHistory.length - 1] !== 'module') {
+                    currentModule = '';
+                }
+                updateNavigationUI();
+            }
         }
 
         function renderModule() {
@@ -158,47 +219,48 @@
                     <div class="stat-card">Saldo <b>R$ ${(ins - outs).toFixed(2)}</b></div>
                 `;
                 form.innerHTML = `
-                    <div class="input-group"><label>Descrição</label><input type="text" id="f-desc"></div>
-                    <div class="input-group"><label>Valor</label><input type="number" id="f-val"></div>
-                    <div class="input-group"><label>Tipo</label><select id="f-type"><option value="in">Entrada</option><option value="out">Saída</option></select></div>
-                    <button class="btn btn-blue" onclick="addData()">Salvar</button>
+                    <div class="input-group"><label>Descrição</label><input type="text" id="f-desc" placeholder="Ex: Venda de produto"></div>
+                    <div class="input-group"><label>Valor</label><input type="number" id="f-val" placeholder="0.00"></div>
+                    <div class="input-group"><label>Tipo</label><select id="f-type"><option value="in">Entrada (+)</option><option value="out">Saída (-)</option></select></div>
+                    <button class="btn btn-blue" onclick="addData()">Salvar Registro</button>
                 `;
             } else if (currentModule === 'biz_sales') {
                 const stock = DB.get('biz_stock');
                 form.innerHTML = `
-                    <div class="input-group"><label>Produto</label>
-                    <select id="s-prod">${stock.map((p, i) => `<option value="${i}">${p.name} (R$ ${p.price})</option>`)}</select></div>
+                    <div class="input-group"><label>Selecionar Produto</label>
+                    <select id="s-prod">${stock.length > 0 ? stock.map((p, i) => `<option value="${i}">${p.name} (R$ ${p.price})</option>`) : '<option disabled>Nenhum produto no estoque</option>'}</select></div>
                     <div class="input-group"><label>Quantidade</label><input type="number" id="s-qty" value="1"></div>
-                    <button class="btn btn-blue" onclick="addSale()">Vender</button>
+                    <div class="input-group"><label>Nome do Cliente (Opcional)</label><input type="text" id="s-client" placeholder="Ex: Maria Silva"></div>
+                    <button class="btn btn-blue" onclick="addSale()">Registrar Venda</button>
                 `;
             } else if (currentModule === 'biz_stock') {
                 form.innerHTML = `
-                    <div class="input-group"><label>Produto</label><input type="text" id="st-name"></div>
-                    <div class="input-group"><label>Preço Unitário</label><input type="number" id="st-price"></div>
-                    <div class="input-group"><label>Qtd Inicial</label><input type="number" id="st-qty"></div>
-                    <button class="btn btn-blue" onclick="addData()">Adicionar</button>
+                    <div class="input-group"><label>Nome do Produto</label><input type="text" id="st-name" placeholder="Ex: Camiseta P"></div>
+                    <div class="input-group"><label>Preço Unitário (Venda)</label><input type="number" id="st-price" placeholder="0.00"></div>
+                    <div class="input-group"><label>Quantidade em Estoque</label><input type="number" id="st-qty" placeholder="0"></div>
+                    <button class="btn btn-blue" onclick="addData()">Adicionar ao Estoque</button>
                 `;
             } else if (currentModule === 'rou_tasks') {
                 form.innerHTML = `
-                    <div class="input-group"><label>Tarefa</label><input type="text" id="t-name"></div>
-                    <div class="input-group"><label>Prioridade</label><select id="t-pri"><option>Baixa</option><option>Alta</option></select></div>
-                    <button class="btn btn-blue" onclick="addData()">Adicionar</button>
+                    <div class="input-group"><label>Descrição da Tarefa</label><input type="text" id="t-name" placeholder="Ex: Comprar materiais"></div>
+                    <div class="input-group"><label>Prioridade</label><select id="t-pri"><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
+                    <button class="btn btn-blue" onclick="addData()">Adicionar Tarefa</button>
                 `;
             } else if (currentModule === 'hea_workout') {
                 form.innerHTML = `
-                    <div class="input-group"><label>Exercício</label><input type="text" id="w-name"></div>
-                    <div class="input-group"><label>Séries x Reps</label><input type="text" id="w-reps"></div>
-                    <button class="btn btn-blue" onclick="addData()">Salvar Treino</button>
+                    <div class="input-group"><label>Nome do Exercício</label><input type="text" id="w-name" placeholder="Ex: Supino Reto"></div>
+                    <div class="input-group"><label>Séries x Repetições</label><input type="text" id="w-reps" placeholder="Ex: 3 x 12"></div>
+                    <button class="btn btn-blue" onclick="addData()">Salvar no Treino</button>
                 `;
             } else {
                 form.innerHTML = `
-                    <div class="input-group"><label>Nome/Descrição</label><input type="text" id="gen-name"></div>
-                    <div class="input-group"><label>Valor/Info</label><input type="text" id="gen-info"></div>
-                    <button class="btn btn-blue" onclick="addData()">Salvar</button>
+                    <div class="input-group"><label>Nome / Descrição</label><input type="text" id="gen-name"></div>
+                    <div class="input-group"><label>Informação / Valor</label><input type="text" id="gen-info"></div>
+                    <button class="btn btn-blue" onclick="addData()">Salvar Registro</button>
                 `;
             }
 
-            list.innerHTML = data.length ? '' : '<p style="padding:2rem; color:#94a3b8; text-align:center">Nenhum registro.</p>';
+            list.innerHTML = data.length ? '' : '<p style="padding:2rem; color:#94a3b8; text-align:center">Nenhum registro encontrado.</p>';
             data.slice().reverse().forEach((item, idx) => {
                 const isFinance = (currentModule === 'biz_finance' || currentModule === 'per_finance');
                 const colorClass = isFinance ? (item.type === 'in' ? 'color:var(--success)' : 'color:var(--danger)') : 'color:#64748b';
@@ -207,9 +269,10 @@
                     <div class="item">
                         <div>
                             <strong>${item.name || item.desc || 'Registro'}</strong>
-                            <div style="font-size:0.8rem; ${colorClass}">${item.val ? 'R$ '+item.val : (item.info || item.qty || '')}</div>
+                            <div style="font-size:0.8rem; ${colorClass}">${item.val ? 'R$ '+Number(item.val).toFixed(2) : (item.info || item.qty || '')}</div>
+                            ${item.client ? `<div style="font-size:0.7rem; color:#94a3b8">Cliente: ${item.client}</div>` : ''}
                         </div>
-                        <button onclick="deleteData(${data.length - 1 - idx})" style="border:none; background:none; cursor:pointer; color:var(--danger)"><i data-lucide="trash-2" size="18"></i></button>
+                        <button onclick="deleteData(${data.length - 1 - idx})" style="border:none; background:none; cursor:pointer; color:var(--danger)" title="Excluir"><i data-lucide="trash-2" size="18"></i></button>
                     </div>
                 `;
             });
@@ -218,7 +281,7 @@
 
         function addData() {
             const data = DB.get(currentModule);
-            let newItem = { id: Date.now(), date: new Date().toLocaleDateString() };
+            let newItem = { id: Date.now(), date: new Date().toLocaleDateString('pt-BR') };
 
             if (currentModule === 'biz_finance' || currentModule === 'per_finance') {
                 newItem.desc = document.getElementById('f-desc').value;
@@ -244,7 +307,7 @@
                 DB.save(currentModule, data);
                 renderModule();
             } else {
-                alert('Preencha os campos obrigatórios!');
+                alert('Por favor, preencha todos os campos obrigatórios!');
             }
         }
 
@@ -253,20 +316,28 @@
             const sales = DB.get('biz_sales');
             const bizFin = DB.get('biz_finance');
             const idx = document.getElementById('s-prod').value;
-            const qty = Number(document.getElementById('s-qty').value);
+            const qtyInput = document.getElementById('s-qty');
+            const qty = Number(qtyInput.value);
+            const client = document.getElementById('s-client').value || 'Consumidor Final';
 
             if (stock[idx] && stock[idx].qty >= qty) {
                 const total = stock[idx].price * qty;
                 stock[idx].qty -= qty;
-                sales.push({ name: `Venda: ${stock[idx].name}`, qty, val: total });
-                bizFin.push({ desc: `Venda: ${stock[idx].name}`, val: total, type: 'in' });
+                sales.push({ 
+                    name: `Venda: ${stock[idx].name}`, 
+                    qty: qty, 
+                    val: total, 
+                    client: client,
+                    date: new Date().toLocaleDateString('pt-BR')
+                });
+                bizFin.push({ desc: `Venda: ${stock[idx].name} (${client})`, val: total, type: 'in', date: new Date().toLocaleDateString('pt-BR') });
                 
                 DB.save('biz_stock', stock);
                 DB.save('biz_sales', sales);
                 DB.save('biz_finance', bizFin);
                 renderModule();
             } else {
-                alert('Estoque insuficiente!');
+                alert('Erro: Estoque insuficiente para realizar esta venda.');
             }
         }
 
@@ -281,23 +352,74 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const data = DB.get(currentModule);
+            const titleMap = {
+                'biz_finance': 'Relatório Financeiro de Negócios',
+                'biz_sales': 'Relatório de Vendas',
+                'biz_stock': 'Relatório de Estoque',
+                'per_finance': 'Relatório Financeiro Pessoal',
+                'rou_tasks': 'Lista de Tarefas',
+                'hea_workout': 'Registro de Treinos',
+                'rou_habits': 'Controle de Hábitos',
+                'hea_diet': 'Controle de Dieta'
+            };
+
+            const reportTitle = titleMap[currentModule] || 'Relatório de Dados - IADU';
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(22);
+            doc.setTextColor(37, 99, 235);
+            doc.text("IADU", 105, 20, { align: "center" });
             
-            doc.setFontSize(20);
-            doc.text(`Relatorio IADU: ${currentModule.toUpperCase()}`, 10, 20);
+            doc.setFontSize(16);
+            doc.setTextColor(30, 41, 59);
+            doc.text(reportTitle, 105, 30, { align: "center" });
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Data de Emissão: ${new Date().toLocaleString('pt-BR')}`, 105, 38, { align: "center" });
             
-            doc.setFontSize(12);
-            let y = 40;
-            data.forEach((item, i) => {
-                const line = `${i+1}. ${item.name || item.desc} - ${item.val || item.info || item.qty || ''}`;
-                doc.text(line, 10, y);
-                y += 10;
-                if(y > 280) { doc.addPage(); y = 20; }
+            doc.setDrawColor(226, 232, 240);
+            doc.line(20, 42, 190, 42);
+
+            let columns = [];
+            let rows = [];
+
+            if (currentModule === 'biz_sales') {
+                columns = ["Data", "Produto", "Qtd", "Cliente", "Total"];
+                rows = data.map(i => [i.date, i.name.replace('Venda: ', ''), i.qty, i.client || '-', `R$ ${Number(i.val).toFixed(2)}`]);
+            } else if (currentModule.includes('finance')) {
+                columns = ["Data", "Descrição", "Tipo", "Valor"];
+                rows = data.map(i => [i.date || '-', i.desc, i.type === 'in' ? 'Entrada' : 'Saída', `R$ ${Number(i.val).toFixed(2)}`]);
+            } else {
+                columns = ["Descrição / Nome", "Informação / Qtd"];
+                rows = data.map(i => [i.name || i.desc, i.val || i.info || i.qty || '-']);
+            }
+
+            doc.autoTable({
+                startY: 50,
+                head: [columns],
+                body: rows,
+                theme: 'striped',
+                headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [248, 250, 252] },
+                margin: { top: 50 },
+                styles: { fontSize: 10, cellPadding: 4 }
             });
-            
-            doc.save(`relatorio_${currentModule}.pdf`);
+
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(148, 163, 184);
+                doc.text("Gerado automaticamente por IADU - Seu Organizador Pessoal e de Negócios", 105, 285, { align: "center" });
+            }
+
+            doc.save(`IADU_${currentModule}_${Date.now()}.pdf`);
         }
 
-        window.onload = () => lucide.createIcons();
+        window.onload = () => {
+            updateNavigationUI();
+        };
     </script>
 </body>
 </html>
