@@ -231,6 +231,7 @@
                     <select id="s-prod">${stock.length > 0 ? stock.map((p, i) => `<option value="${i}">${p.name} (R$ ${p.price})</option>`) : '<option disabled>Nenhum produto no estoque</option>'}</select></div>
                     <div class="input-group"><label>Quantidade</label><input type="number" id="s-qty" value="1"></div>
                     <div class="input-group"><label>Nome do Cliente (Opcional)</label><input type="text" id="s-client" placeholder="Ex: Maria Silva"></div>
+                    <div class="input-group"><label>Telefone do Cliente (Opcional)</label><input type="tel" id="s-phone" placeholder="Ex: (11) 98888-7777"></div>
                     <button class="btn btn-blue" onclick="addSale()">Registrar Venda</button>
                 `;
             } else if (currentModule === 'biz_stock') {
@@ -270,7 +271,7 @@
                         <div>
                             <strong>${item.name || item.desc || 'Registro'}</strong>
                             <div style="font-size:0.8rem; ${colorClass}">${item.val ? 'R$ '+Number(item.val).toFixed(2) : (item.info || item.qty || '')}</div>
-                            ${item.client ? `<div style="font-size:0.7rem; color:#94a3b8">Cliente: ${item.client}</div>` : ''}
+                            ${item.client ? `<div style="font-size:0.7rem; color:#94a3b8">Cliente: ${item.client} ${item.phone ? ' | Tel: ' + item.phone : ''}</div>` : (item.phone ? `<div style="font-size:0.7rem; color:#94a3b8">Tel: ${item.phone}</div>` : '')}
                         </div>
                         <button onclick="deleteData(${data.length - 1 - idx})" style="border:none; background:none; cursor:pointer; color:var(--danger)" title="Excluir"><i data-lucide="trash-2" size="18"></i></button>
                     </div>
@@ -318,7 +319,8 @@
             const idx = document.getElementById('s-prod').value;
             const qtyInput = document.getElementById('s-qty');
             const qty = Number(qtyInput.value);
-            const client = document.getElementById('s-client').value || 'Consumidor Final';
+            const client = document.getElementById('s-client').value;
+            const phone = document.getElementById('s-phone').value;
 
             if (stock[idx] && stock[idx].qty >= qty) {
                 const total = stock[idx].price * qty;
@@ -327,10 +329,16 @@
                     name: `Venda: ${stock[idx].name}`, 
                     qty: qty, 
                     val: total, 
-                    client: client,
+                    client: client || 'Consumidor Final',
+                    phone: phone || '',
                     date: new Date().toLocaleDateString('pt-BR')
                 });
-                bizFin.push({ desc: `Venda: ${stock[idx].name} (${client})`, val: total, type: 'in', date: new Date().toLocaleDateString('pt-BR') });
+                bizFin.push({ 
+                    desc: `Venda: ${stock[idx].name} (${client || 'Consumidor Final'})`, 
+                    val: total, 
+                    type: 'in', 
+                    date: new Date().toLocaleDateString('pt-BR') 
+                });
                 
                 DB.save('biz_stock', stock);
                 DB.save('biz_sales', sales);
@@ -385,8 +393,15 @@
             let rows = [];
 
             if (currentModule === 'biz_sales') {
-                columns = ["Data", "Produto", "Qtd", "Cliente", "Total"];
-                rows = data.map(i => [i.date, i.name.replace('Venda: ', ''), i.qty, i.client || '-', `R$ ${Number(i.val).toFixed(2)}`]);
+                columns = ["Data", "Produto", "Qtd", "Cliente", "Telefone", "Total"];
+                rows = data.map(i => [
+                    i.date, 
+                    i.name.replace('Venda: ', ''), 
+                    i.qty, 
+                    i.client || '-', 
+                    i.phone || '-', 
+                    `R$ ${Number(i.val).toFixed(2)}`
+                ]);
             } else if (currentModule.includes('finance')) {
                 columns = ["Data", "Descrição", "Tipo", "Valor"];
                 rows = data.map(i => [i.date || '-', i.desc, i.type === 'in' ? 'Entrada' : 'Saída', `R$ ${Number(i.val).toFixed(2)}`]);
