@@ -34,6 +34,15 @@
         .card { background: white; border: 1px solid var(--border); padding: 2rem; border-radius: 1rem; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 
+        /* Instruções de Instalação */
+        .install-guide { margin-top: 4rem; padding: 2rem; background: #f1f5f9; border-radius: 1rem; text-align: left; border: 1px dashed #cbd5e1; }
+        .install-guide h3 { color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+        .guide-step { background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border); }
+        .guide-step h4 { font-size: 0.9rem; margin-bottom: 0.5rem; color: #475569; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.3rem; }
+        .guide-step ol { padding-left: 1.2rem; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
+        @media (max-width: 600px) { .guide-grid { grid-template-columns: 1fr; } }
+
         /* Estatísticas */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border); text-align: center; }
@@ -87,6 +96,33 @@
                 <div class="card" onclick="goTo('rotina')"><i data-lucide="calendar" color="var(--routine)"></i><span>Rotina</span></div>
                 <div class="card" onclick="goTo('saude')"><i data-lucide="heart" color="var(--health)"></i><span>Saúde</span></div>
             </div>
+
+            <!-- Guia de Instalação -->
+            <div class="install-guide">
+                <h3><i data-lucide="download-cloud"></i> Instalar como Aplicativo</h3>
+                <p style="font-size: 0.9rem; color: #64748b;">Use o IADU direto da tela inicial do seu celular como um app real:</p>
+                
+                <div class="guide-grid">
+                    <div class="guide-step">
+                        <h4><i data-lucide="smartphone" size="14"></i> Android (Chrome)</h4>
+                        <ol>
+                            <li>Abra o navegador Chrome.</li>
+                            <li>Toque nos <b>três pontos (⋮)</b> no canto superior direito.</li>
+                            <li>Selecione <b>"Instalar aplicativo"</b> ou "Adicionar à tela inicial".</li>
+                            <li>Confirme em "Instalar".</li>
+                        </ol>
+                    </div>
+                    <div class="guide-step">
+                        <h4><i data-lucide="apple" size="14"></i> iPhone (Safari)</h4>
+                        <ol>
+                            <li>Abra o navegador Safari.</li>
+                            <li>Toque no botão <b>Compartilhar (quadrado com seta)</b> na barra inferior.</li>
+                            <li>Role para baixo e selecione <b>"Adicionar à Tela de Início"</b>.</li>
+                            <li>Toque em "Adicionar" no canto superior.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Submenus de Categorias -->
@@ -135,7 +171,6 @@
             save: (key, data) => localStorage.setItem('iadu_' + key, JSON.stringify(data))
         };
 
-        // Controle de Navegação (Pilha de Histórico)
         let navHistory = ['main'];
         let currentModule = '';
 
